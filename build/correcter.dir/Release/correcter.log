@@ -1,0 +1,5 @@
+﻿  correcter.cpp
+C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\correcter.cpp(220): warning C4305: 'argument' : troncation de 'double' à 'float'
+C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\correcter.cpp(267): warning C4244: 'argument' : conversion de 'double' en 'float', perte possible de données
+C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\correcter.cpp(267): warning C4244: 'argument' : conversion de 'int' en 'float', perte possible de données
+  correcter.vcxproj -> C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\build\Release\correcter.exe
