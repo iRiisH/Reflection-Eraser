@@ -78,7 +78,7 @@ Mat& gradient(const Mat& img)
 
 Mat& vecMul(const Mat& A, const Mat& v)
 {
-	assert(A.cols == v.cols * v.rows);
+	assert(A.cols == v.cols * v.rows && A.rows = v.cols * v.rows);
 
 	Mat& res = Mat::zeros(v.rows, v.cols);
 
