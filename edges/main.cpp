@@ -7,6 +7,9 @@
 #include <opencv2/video/tracking.hpp>
 
 #include <iostream>
+#include <fstram>
+#include <time.h>
+
 
 using namespace cv;
 using namespace std;
@@ -98,7 +101,7 @@ void detectSparseMotion(Mat& I1, Mat& I2)
 
 
 	Scalar colors[3] = { Scalar(0, 0, 255), Scalar(51, 0, 102), Scalar(255, 128, 0) };
-	int N = 3;
+	int N = 1;
 
 	for (int nb = 0; nb < N; nb++)
 	{
@@ -120,6 +123,69 @@ void detectSparseMotion(Mat& I1, Mat& I2)
 		new_scene = rms; new_obj = rmo;
 	}
 	imshow("I1", I1);
+	waitKey(0);
+}
+
+void nearestNeighbourWeightedInterpolation(Mat& img)
+// http://paulbourke.net/miscellaneous/interpolation/
+{
+	assert(img.type() == CV_32F);
+	int P = 4;
+	int m = img.rows, n = img.cols;
+	vector<Point2f> sparseData;
+	for (int i = 0; i < m; i++)
+	{
+		for (int j = 0; j < n; j++)
+		{
+			Point2f p(i, j);
+			if (img.at<float>(p) != 0.)
+				sparseData.push_back(p);
+		}
+	}
+	for (int i = 0; i < m; i++)
+	{
+		for (int j = 0; j < n; j++)
+		{
+			Point2f p(i, j);
+			if (find(sparseData.begin(), sparseData.end(), p) != sparseData.end())
+				continue;
+			else
+			{
+				float sum = 0., norm = 0.;
+				for (int k = 0; k < sparseData.size(); k++)
+				{
+					Point2f pK = sparseData[k];
+					sum += img.at<float>(pK) /
+						pow(pow(pK.x - i, 2.) + pow(pK.y - j, 2.), (float)P / 2.);
+					norm+= 1. /
+						pow(pow(pK.x - i, 2.) + pow(pK.y - j, 2.), (float)P / 2.);
+				}
+				img.at<float>(p) = sum / norm;
+			}	
+		}
+	}
+}
+
+void testInterpolation()
+{
+	Mat img = Mat::zeros(400, 400, CV_32F);
+	srand(time(NULL));
+	int m = img.rows, n = img.cols;
+	for (int i = 0; i < m; i++)
+	{
+		for (int j = 0; j < n; j++)
+		{
+			float r1 = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+			if (r1 < .01)
+			{
+				Point2f p(i, j);
+				float r2 = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+				img.at<float>(p) = r2;
+			}
+		}
+	}
+	nearestNeighbourWeightedInterpolation(img);
+	imshow("interpolation", img);
 	waitKey(0);
 }
 

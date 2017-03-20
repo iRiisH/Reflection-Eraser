@@ -1,4 +1,4 @@
 ﻿  main.cpp
-C:\Users\Tangi\Documents\Travail\INF\INF473i\edges\main.cpp(82): warning C4244: 'argument' : conversion de 'int' en 'float', perte possible de données
-C:\Users\Tangi\Documents\Travail\INF\INF473i\edges\main.cpp(86): warning C4244: 'argument' : conversion de 'int' en 'float', perte possible de données
-  edges.vcxproj -> C:\Users\Tangi\Documents\Travail\INF\INF473i\edges\build\Debug\edges.exe
+C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\edges\main.cpp(71): warning C4244: 'argument' : conversion de 'int' en 'float', perte possible de données
+C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\edges\main.cpp(75): warning C4244: 'argument' : conversion de 'int' en 'float', perte possible de données
+  edges.vcxproj -> C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\edges\build\Debug\edges.exe
