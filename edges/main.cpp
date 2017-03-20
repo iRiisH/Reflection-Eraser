@@ -7,9 +7,10 @@
 #include <opencv2/video/tracking.hpp>
 
 #include <iostream>
-#include <fstram>
+#include <fstream>
 #include <time.h>
 
+#define P 4
 
 using namespace cv;
 using namespace std;
@@ -127,10 +128,8 @@ void detectSparseMotion(Mat& I1, Mat& I2)
 }
 
 void nearestNeighbourWeightedInterpolation(Mat& img)
-// http://paulbourke.net/miscellaneous/interpolation/
 {
 	assert(img.type() == CV_32F);
-	int P = 4;
 	int m = img.rows, n = img.cols;
 	vector<Point2f> sparseData;
 	for (int i = 0; i < m; i++)
@@ -168,24 +167,30 @@ void nearestNeighbourWeightedInterpolation(Mat& img)
 
 void testInterpolation()
 {
-	Mat img = Mat::zeros(400, 400, CV_32F);
+	Mat img = Mat::zeros(300, 300, CV_32F);
+	Mat orig;
+	img.copyTo(orig);
 	srand(time(NULL));
 	int m = img.rows, n = img.cols;
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)
 		{
+			Point2f p(i, j);
 			float r1 = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-			if (r1 < .01)
+			if (r1 < .005)
 			{
-				Point2f p(i, j);
-				float r2 = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-				img.at<float>(p) = r2;
+				img.at<float>(p) = 255.*(float)cos((float)i / 25.)*cos((float)j / 25.);
 			}
+			orig.at<float>(p) = 255.*(float)cos((float)i / 25.)*cos((float)j / 25.);
 		}
 	}
 	nearestNeighbourWeightedInterpolation(img);
-	imshow("interpolation", img);
+	//imwrite("../results/original.bmp",orig);
+	imwrite("../results/interpolation.bmp", img);
+	//imshow("original", orig);
+	//imshow("interpolation", img);
+	
 	waitKey(0);
 }
 
@@ -195,7 +200,7 @@ int main(int argc, char** argv)
 	Mat I2 = imread("../edges2.png");
 	
 	//edges();
-	detectSparseMotion(I1, I2);
-
+	//detectSparseMotion(I1, I2);
+	testInterpolation();
 	return 0;
 }

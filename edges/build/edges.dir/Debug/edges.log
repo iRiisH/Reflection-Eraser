@@ -1,4 +1,12 @@
 ﻿  main.cpp
-C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\edges\main.cpp(71): warning C4244: 'argument' : conversion de 'int' en 'float', perte possible de données
-C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\edges\main.cpp(75): warning C4244: 'argument' : conversion de 'int' en 'float', perte possible de données
+C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\edges\main.cpp(74): warning C4244: 'argument' : conversion de 'int' en 'float', perte possible de données
+C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\edges\main.cpp(78): warning C4244: 'argument' : conversion de 'int' en 'float', perte possible de données
+C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\edges\main.cpp(139): warning C4244: 'argument' : conversion de 'int' en 'float', perte possible de données
+C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\edges\main.cpp(148): warning C4244: 'argument' : conversion de 'int' en 'float', perte possible de données
+C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\edges\main.cpp(158): warning C4244: '+=' : conversion de 'double' en 'float', perte possible de données
+C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\edges\main.cpp(160): warning C4244: '+=' : conversion de 'double' en 'float', perte possible de données
+C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\edges\main.cpp(173): warning C4244: 'argument' : conversion de 'time_t' en 'unsigned int', perte possible de données
+C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\edges\main.cpp(179): warning C4244: 'argument' : conversion de 'int' en 'float', perte possible de données
+C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\edges\main.cpp(183): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\edges\main.cpp(185): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
   edges.vcxproj -> C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\edges\build\Debug\edges.exe
