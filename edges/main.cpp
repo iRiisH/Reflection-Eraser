@@ -194,6 +194,32 @@ void testInterpolation()
 	waitKey(0);
 }
 
+void interpolateMotionField(Mat& v)
+{
+	int m = v.rows, n = v.cols;
+	Mat vx = Mat::zeros(m, n, CV_32F), vy = Mat::zeros(m, n, CV_32F);
+	for (int i = 0; i < m; i++)
+	{
+		for (int j = 0; j < n; j++)
+		{
+			Point2f p(i, j);
+			vx.at<float>(p) = (float)v.at<Point2f>(p).x;
+			vy.at<float>(p) = (float)v.at<Point2f>(p).y;
+		}
+	}
+	nearestNeighbourWeightedInterpolation(vx);
+	nearestNeighbourWeightedInterpolation(vy);
+	for (int i = 0; i < m; i++)
+	{
+		for (int j = 0; j < n; j++)
+		{
+			Point2f p(i, j);
+			(v.at<Point2f>(p)).x = (int)(vx.at<float>(p));
+			(v.at<Point2f>(p)).y = (int)(vy.at<float>(p));
+		}
+	}
+}
+
 int main(int argc, char** argv)
 {
 	Mat I1 = imread("../edges1.png");
