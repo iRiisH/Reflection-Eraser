@@ -1,15 +1,10 @@
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-
-#include <iostream>
+#include "decomposition.h"
 
 #define LAMBDA2 .1
 #define LAMBDA3 3000
 #define LAMBDA4 .5
 #define LAMBDAP 100000.
 
-using namespace cv;
-using namespace std;
 
 float func_w1(const Mat& I_t, const Mat& I_Oh, const Mat& I_Bh, const Mat& W_Ot,
 	const Mat& W_Ot, const Mat& W_Bt)

@@ -1,16 +1,4 @@
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-
-#include <iostream>
-
-using namespace cv;
-using namespace std;
-
-struct IntVec
-{
-	int x;
-	int y;
-};
+#include "motion.h"
 
 float func_w1(const Mat& I_t, const Mat& I_O, const Mat& I_B, IntVec[][] V_Oth, IntVec[][] V_Bth, IntVec a)
 {
