@@ -89,6 +89,7 @@ void detectSparseMotion(Mat& I1, Mat& I2)
 	findHomography(scene, obj, mask, RANSAC);
 
 	vector<Point2f> new_obj, new_scene;
+	Mat v1 = 
 	for (int i = 0; i < mask.rows; i++)
 	{
 		if (mask.at<uchar>(i, 0) != 0)
@@ -99,7 +100,7 @@ void detectSparseMotion(Mat& I1, Mat& I2)
 			new_obj.push_back(obj[i]);
 		}
 	}
-
+	
 
 	Scalar colors[3] = { Scalar(0, 0, 255), Scalar(51, 0, 102), Scalar(255, 128, 0) };
 	int N = 1;
@@ -123,8 +124,9 @@ void detectSparseMotion(Mat& I1, Mat& I2)
 		}
 		new_scene = rms; new_obj = rmo;
 	}
-	imshow("I1", I1);
-	waitKey(0);
+//	imshow("I1", I1);
+//	waitKey(0);
+
 }
 
 void nearestNeighbourWeightedInterpolation(Mat& img)
@@ -194,17 +196,18 @@ void testInterpolation()
 	waitKey(0);
 }
 
-void interpolateMotionField(Mat& v)
+void interpolateMotionField(vector<vector<Point2f>> v)
 {
-	int m = v.rows, n = v.cols;
+	assert(v.size() > 0);
+	int m = v.size (), n = v[0].size ();
 	Mat vx = Mat::zeros(m, n, CV_32F), vy = Mat::zeros(m, n, CV_32F);
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)
 		{
 			Point2f p(i, j);
-			vx.at<float>(p) = (float)v.at<Point2f>(p).x;
-			vy.at<float>(p) = (float)v.at<Point2f>(p).y;
+			vx.at<float>(p) = (float)v[i][j].x;
+			vy.at<float>(p) = (float)v[i][j].y;
 		}
 	}
 	nearestNeighbourWeightedInterpolation(vx);
@@ -214,10 +217,25 @@ void interpolateMotionField(Mat& v)
 		for (int j = 0; j < n; j++)
 		{
 			Point2f p(i, j);
-			(v.at<Point2f>(p)).x = (int)(vx.at<float>(p));
-			(v.at<Point2f>(p)).y = (int)(vy.at<float>(p));
+			v[i][j].x = (int)(vx.at<float>(p));
+			v[i][j].y = (int)(vy.at<float>(p));
 		}
 	}
+}
+
+void saveMotionField(const vector<vector<Point2f>> v, String filename)
+{
+	assert(v.size() > 0);
+	ofstream file;
+	file.open("../"+filename);
+	int m = v.size (), n = v[0].size ();
+	for (int i = 0; i < m; i++)
+	{
+		for (int j = 0; j < n; j++)
+			file << "(" << v[i][j].x << ", " << v[i][j].y << ") ";
+		file << "\n";
+	}
+	file.close();
 }
 
 int main(int argc, char** argv)
@@ -226,7 +244,8 @@ int main(int argc, char** argv)
 	Mat I2 = imread("../edges2.png");
 	
 	//edges();
-	//detectSparseMotion(I1, I2);
-	testInterpolation();
+	//testInterpolation();
+	detectSparseMotion(I1, I2);
+	
 	return 0;
 }
