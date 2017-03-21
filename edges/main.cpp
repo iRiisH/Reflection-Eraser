@@ -231,7 +231,10 @@ void interpolateMotionField(vector<vector<Point2i>> v)
 		}
 	}
 	nearestNeighbourWeightedInterpolation(vx);
-	nearestNeighbourWeightedInterpolation(vy);
+	normalize(vx, vx, 0, 255, NORM_MINMAX);
+	imshow("vx", vx);
+	waitKey(0);
+	/*nearestNeighbourWeightedInterpolation(vy);
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)
@@ -239,7 +242,7 @@ void interpolateMotionField(vector<vector<Point2i>> v)
 			v[i][j].x = (int)(vx.at<float>(i, j));
 			v[i][j].y = (int)(vy.at<float>(i, j));
 		}
-	}
+	}*/
 }
 
 void saveMotionField(const vector<vector<Point2i>> v, String filename)
@@ -345,7 +348,7 @@ int main(int argc, char** argv)
 	//saveMotionField(f.v1, "v1.txt");
 	//saveMotionField(f.v2, "v2.txt");
 	//cout << float(time(NULL) - begin_time) << endl;
-	vector<vector<Point2i>> v1, v2;
+	/*vector<vector<Point2i>> v1, v2;
 	v1 = loadMotionField("v1.txt");
 	v2 = loadMotionField("v2.txt");
 	Mat img1, img2;
@@ -353,6 +356,15 @@ int main(int argc, char** argv)
 	displayMotionField(v2, img2);
 	imshow("img1", img1);
 	imshow("img2", img2);
+	waitKey(0);
+	interpolateMotionField(v1);
+	saveMotionField(v1, "result.txt");*/
+	vector<vector<Point2i>> v;
+	v = loadMotionField("result.txt");
+	Mat img;
+
+	displayMotionField(v, img);
+	imshow("img", img);
 	waitKey(0);
 	return 0;
 }
