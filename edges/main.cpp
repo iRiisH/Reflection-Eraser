@@ -53,10 +53,13 @@ void detectEdges()
 	waitKey(0);
 }
 
-void detectSparseMotion(Mat& I1, Mat& I2)
+struct Fields {
+	vector<vector<Point2i>> v1, v2;
+};
+
+Fields detectSparseMotion(Mat& I1, Mat& I2)
 {
 	Mat G1, G2;
-
 	cvtColor(I1, G1, COLOR_BGR2GRAY);
 	cvtColor(I2, G2, COLOR_BGR2GRAY);
 	Mat F1, F2;
@@ -66,17 +69,17 @@ void detectSparseMotion(Mat& I1, Mat& I2)
 	Mat flow;
 	calcOpticalFlowFarneback(F1, F2, flow, 0.5, 3, 15, 3, 5, 1.2, 0);
 
-	vector<Point2f> obj, scene;
+	vector<Point2i> obj, scene;
 	int m = F1.rows, n = F1.cols;
 	for (int i = 0; i < n; i += 4)
 	{
 		for (int j = 0; j < m; j += 4)
 		{
-			Point2f p1(i, j);
+			Point2i p1(i, j);
 			if (F1.at<float>(p1) != 0.)
 			{
 				const Point2f& fxy = flow.at<Point2f>(p1);
-				Point2f p2(cvRound(i + fxy.x), cvRound(j + fxy.y));
+				Point2i p2(cvRound(i + fxy.x), cvRound(j + fxy.y));
 				//line(I1, p1, p2, Scalar(0, 255, 0));
 				circle(I1, p1, 1, Scalar(255, 0, 0));
 
@@ -88,19 +91,33 @@ void detectSparseMotion(Mat& I1, Mat& I2)
 	Mat mask;
 	findHomography(scene, obj, mask, RANSAC);
 
-	vector<Point2f> new_obj, new_scene;
-	Mat v1 = 
+	vector <vector<Point2i>> v1, v2;
+	// initialize motion fields with zeros
+	for (int i = 0; i < m; i++)
+	{
+		vector<Point2i> temp1, temp2;
+		for (int j = 0; j < n; j++)
+		{
+			temp1.push_back(Point2i(0, 0));
+			temp2.push_back(Point2i(0, 0));
+		}
+		v1.push_back(temp1);
+		v2.push_back(temp2);
+	}
+	vector<Point2i> new_obj, new_scene;
 	for (int i = 0; i < mask.rows; i++)
 	{
 		if (mask.at<uchar>(i, 0) != 0)
+		{
 			arrowedLine(I1, scene[i], obj[i], Scalar(0, 255, 0));
+			v1[scene[i].y][scene[i].x] = obj[i];
+		}
 		else
 		{
 			new_scene.push_back(scene[i]);
 			new_obj.push_back(obj[i]);
 		}
 	}
-	
 
 	Scalar colors[3] = { Scalar(0, 0, 255), Scalar(51, 0, 102), Scalar(255, 128, 0) };
 	int N = 1;
@@ -108,13 +125,15 @@ void detectSparseMotion(Mat& I1, Mat& I2)
 	for (int nb = 0; nb < N; nb++)
 	{
 		Mat new_mask;
-		cout << new_scene.size() << " - " << new_obj.size() << endl;
 		findHomography(new_scene, new_obj, new_mask, RANSAC);
-		vector<Point2f> rms, rmo;
+		vector<Point2i> rms, rmo;
 		for (int i = 0; i < new_mask.rows; i++)
 		{
 			if (new_mask.at<uchar>(i, 0) != 0)
+			{
 				arrowedLine(I1, new_scene[i], new_obj[i], colors[nb]);
+				v2[new_scene[i].y][new_scene[i].x] = new_obj[i];
+			}
 			else
 			{
 				rms.push_back(new_scene[i]);
@@ -124,6 +143,10 @@ void detectSparseMotion(Mat& I1, Mat& I2)
 		}
 		new_scene = rms; new_obj = rmo;
 	}
+	Fields f;
+	f.v1 = v1;
+	f.v2 = v2;
+	return f;
 //	imshow("I1", I1);
 //	waitKey(0);
 
@@ -133,35 +156,33 @@ void nearestNeighbourWeightedInterpolation(Mat& img)
 {
 	assert(img.type() == CV_32F);
 	int m = img.rows, n = img.cols;
-	vector<Point2f> sparseData;
+	vector<Point2i> sparseData;
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)
 		{
-			Point2f p(i, j);
-			if (img.at<float>(p) != 0.)
-				sparseData.push_back(p);
+			if (img.at<float>(i, j) != 0.)
+				sparseData.push_back(Point2i (i,j));
 		}
 	}
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)
 		{
-			Point2f p(i, j);
-			if (find(sparseData.begin(), sparseData.end(), p) != sparseData.end())
+			if (find(sparseData.begin(), sparseData.end(), Point2i (i,j)) != sparseData.end())
 				continue;
 			else
 			{
 				float sum = 0., norm = 0.;
 				for (int k = 0; k < sparseData.size(); k++)
 				{
-					Point2f pK = sparseData[k];
-					sum += img.at<float>(pK) /
+					Point2i pK = sparseData[k];
+					sum += img.at<float>(pK.x, pK.y) /
 						pow(pow(pK.x - i, 2.) + pow(pK.y - j, 2.), (float)P / 2.);
 					norm+= 1. /
 						pow(pow(pK.x - i, 2.) + pow(pK.y - j, 2.), (float)P / 2.);
 				}
-				img.at<float>(p) = sum / norm;
+				img.at<float>(i, j) = sum / norm;
 			}	
 		}
 	}
@@ -178,7 +199,7 @@ void testInterpolation()
 	{
 		for (int j = 0; j < n; j++)
 		{
-			Point2f p(i, j);
+			Point2i p(i, j);
 			float r1 = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 			if (r1 < .005)
 			{
@@ -196,7 +217,7 @@ void testInterpolation()
 	waitKey(0);
 }
 
-void interpolateMotionField(vector<vector<Point2f>> v)
+void interpolateMotionField(vector<vector<Point2i>> v)
 {
 	assert(v.size() > 0);
 	int m = v.size (), n = v[0].size ();
@@ -205,9 +226,8 @@ void interpolateMotionField(vector<vector<Point2f>> v)
 	{
 		for (int j = 0; j < n; j++)
 		{
-			Point2f p(i, j);
-			vx.at<float>(p) = (float)v[i][j].x;
-			vy.at<float>(p) = (float)v[i][j].y;
+			vx.at<float>(i, j) = (float)(v[i][j].x);
+			vy.at<float>(i, j) = (float)(v[i][j].y);
 		}
 	}
 	nearestNeighbourWeightedInterpolation(vx);
@@ -216,18 +236,17 @@ void interpolateMotionField(vector<vector<Point2f>> v)
 	{
 		for (int j = 0; j < n; j++)
 		{
-			Point2f p(i, j);
-			v[i][j].x = (int)(vx.at<float>(p));
-			v[i][j].y = (int)(vy.at<float>(p));
+			v[i][j].x = (int)(vx.at<float>(i, j));
+			v[i][j].y = (int)(vy.at<float>(i, j));
 		}
 	}
 }
 
-void saveMotionField(const vector<vector<Point2f>> v, String filename)
+void saveMotionField(const vector<vector<Point2i>> v, String filename)
 {
 	assert(v.size() > 0);
 	ofstream file;
-	file.open("../"+filename);
+	file.open("../results/"+filename);
 	int m = v.size (), n = v[0].size ();
 	for (int i = 0; i < m; i++)
 	{
@@ -238,6 +257,81 @@ void saveMotionField(const vector<vector<Point2f>> v, String filename)
 	file.close();
 }
 
+vector<vector<Point2i>> loadMotionField(String filename)
+{
+	vector<vector<Point2i>> v;
+	string line;
+	ifstream file("../results/"+filename);
+	int i = 0, j = 0;
+	if (file.is_open())
+	{
+		cout << "loading motion field at ../results/" + filename << endl;
+		while (getline(file, line))
+		{
+			vector<Point2i> new_line;
+			v.push_back(new_line);
+			j = 0;
+			int x, y;
+			int cnt = 0;
+			for (int k = 0; k < line.size(); k++)
+			{
+				int num;
+				Point2i p;
+				char c = line.at(k);
+				switch (c)
+				{
+				case '1' :
+				case '2' :
+				case '3' :
+				case '4' :
+				case '5' :
+				case '6' :
+				case '7' :
+				case '8' :
+				case '9' :
+				case '0' :
+					num = c - '0';
+					cnt = 10 * cnt + num;
+					break;
+				case ',' :
+					v[i].push_back(p);
+					v[i][j].x = cnt;
+					cnt = 0;
+					break;
+				case ')' :
+					v[i][j].y = cnt;
+					cnt = 0;
+					j++;
+					break;
+				default :
+					break;
+				}
+			}
+			i++;
+		}
+		cout << v.size() << endl;
+		file.close();
+	}
+
+	else cout << "Unable to open file" << endl;;
+	return v;
+}
+
+void displayMotionField(const vector<vector<Point2i>> v)
+{
+	assert(v.size() > 0);
+	int m = v.size(), n = v[0].size();
+	Mat img = Mat::zeros(m, n, CV_32F);
+	for (int i = 0; i < m; i++)
+	{
+		for (int j = 0; j < n; j++)
+			img.at<float>(i, j) = pow(v[i][j].x, 2.) + pow(v[i][j].y, 2.);
+	}
+	normalize(img, img, 0, 255, NORM_MINMAX);
+	imshow("motion field visualization", img);
+	waitKey(0);
+}
+
 int main(int argc, char** argv)
 {
 	Mat I1 = imread("../edges1.png");
@@ -245,7 +339,15 @@ int main(int argc, char** argv)
 	
 	//edges();
 	//testInterpolation();
-	detectSparseMotion(I1, I2);
-	
+	//const time_t begin_time = time(NULL);
+	//Fields f = detectSparseMotion(I1, I2);
+	//interpolateMotionField(f.v1);
+	//interpolateMotionField(f.v2);
+	//saveMotionField(f.v1, "v1.txt");
+	//saveMotionField(f.v2, "v2.txt");
+	//cout << float(time(NULL) - begin_time) << endl;
+	vector<vector<Point2i>> v;
+	v = loadMotionField("v1.txt");
+	displayMotionField(v);
 	return 0;
 }
