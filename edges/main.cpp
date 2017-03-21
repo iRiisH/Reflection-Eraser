@@ -309,7 +309,6 @@ vector<vector<Point2i>> loadMotionField(String filename)
 			}
 			i++;
 		}
-		cout << v.size() << endl;
 		file.close();
 	}
 
@@ -317,18 +316,18 @@ vector<vector<Point2i>> loadMotionField(String filename)
 	return v;
 }
 
-void displayMotionField(const vector<vector<Point2i>> v)
+void displayMotionField(const vector<vector<Point2i>> v, Mat& img)
 {
 	assert(v.size() > 0);
 	int m = v.size(), n = v[0].size();
-	Mat img = Mat::zeros(m, n, CV_32F);
+	img = Mat::zeros(m, n, CV_32F);
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)
 			img.at<float>(i, j) = pow(v[i][j].x, 2.) + pow(v[i][j].y, 2.);
 	}
-	normalize(img, img, 0, 255, NORM_MINMAX);
-	imshow("motion field visualization", img);
+	//normalize(img, img, 0, 255, NORM_MINMAX);
+	//imshow("motion field visualization", img);
 	waitKey(0);
 }
 
@@ -346,8 +345,14 @@ int main(int argc, char** argv)
 	//saveMotionField(f.v1, "v1.txt");
 	//saveMotionField(f.v2, "v2.txt");
 	//cout << float(time(NULL) - begin_time) << endl;
-	vector<vector<Point2i>> v;
-	v = loadMotionField("v1.txt");
-	displayMotionField(v);
+	vector<vector<Point2i>> v1, v2;
+	v1 = loadMotionField("v1.txt");
+	v2 = loadMotionField("v2.txt");
+	Mat img1, img2;
+	displayMotionField(v1, img1);
+	displayMotionField(v2, img2);
+	imshow("img1", img1);
+	imshow("img2", img2);
+	waitKey(0);
 	return 0;
 }
