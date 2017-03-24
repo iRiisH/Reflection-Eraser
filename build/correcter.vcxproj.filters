@@ -1,15 +1,33 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\correcter.cpp">
+    <ClCompile Include="C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\image.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\decomposition.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\initialization.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\motion.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\decomposition.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\initialization.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\motion.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

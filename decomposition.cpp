@@ -6,8 +6,7 @@
 #define LAMBDAP 100000.
 
 
-float func_w1(const Mat& I_t, const Mat& I_Oh, const Mat& I_Bh, const Mat& W_Ot,
-	const Mat& W_Ot, const Mat& W_Bt)
+float func_w1d(const Mat& I_t, const Mat& I_Oh, const Mat& I_Bh, const Mat& W_Ot, const Mat& W_Bt)
 {
 	assert(I_t.depth() == CV_32F && I_Oh.depth() == CV_32F && I_Bh.depth() == CV_32F
 		&& W_Ot.depth() == CV_32F && W_Bt.depth() == CV_32F);
@@ -20,30 +19,30 @@ float func_w1(const Mat& I_t, const Mat& I_Oh, const Mat& I_Bh, const Mat& W_Ot,
 	return result;
 }
 
-float func_w2(const Mat& I_Bh)
+float func_w2d(const Mat& I_Bh)
 {
 	Mat& dx = Dx(I_Bh), dy = Dy(I_Bh);
-	float nx = normL2(dx), dy = normL2(dy);
+	float nx = normL2(dx), ny = normL2(dy);
 	return 1. / phi(nx + ny);
 }
 
-float func_w3(const Mat& I_Oh)
+float func_w3d(const Mat& I_Oh)
 {
 	return func_w2(I_Oh); // w2 and w3 are the exact same function, yet for the code
 						  // to be clear we create two separate functions
 }
 
-float L(I_O, I_Oh, I_B, I_Bh)
+float L(const Mat& I_O, const Mat& I_Oh, const Mat& I_B, const Mat& I_Bh)
 {
-	Mat& DI_O = gradient(I_O), DI_B = gradient(I_B), DI_Oh = gradient(I_Oh), DI_Bh = gradient(I_Bh);
+	Mat DI_O = gradient(I_O), DI_B = gradient(I_B), DI_Oh = gradient(I_Oh), DI_Bh = gradient(I_Bh);
 	float res = 0.;
-	for (int i = 0; i < D_IO.rows; i++)
+	for (int i = 0; i < DI_O.rows; i++)
 	{
-		for (int j = 0; j < D_IO.cols; j++)
+		for (int j = 0; j < DI_O.cols; j++)
 		{
 			sum += DI_Oh * DI_B;
 			sum += DI_O * DI_Bh;
-			sum -= DI_Oh * D_IBh;
+			sum -= DI_Oh * DI_Bh;
 		}
 	}
 	return res;

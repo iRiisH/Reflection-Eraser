@@ -1,6 +1,6 @@
 #include "motion.h"
 
-float func_w1(const Mat& I_t, const Mat& I_O, const Mat& I_B, IntVec[][] V_Oth, IntVec[][] V_Bth, IntVec a)
+float func_w1m(const Mat& I_t, const Mat& I_O, const Mat& I_B, const vector<vector<Point2i>> V_Oth, const vector<vector<Point2i>> V_Bth, IntVec a)
 {
 	IntVec pO, pB;
 	pO.x = a.x - (V_Oth[a.x][a.y]).x; pO.y = a.y - (V_Oth[a.x][a.y]).y;
@@ -10,14 +10,14 @@ float func_w1(const Mat& I_t, const Mat& I_O, const Mat& I_B, IntVec[][] V_Oth, 
 	return 1. / res;	
 }
 
-float func_w2(const Mat& V_Oth)
+float func_w2m(const Mat& V_Oth)
 {
 	Mat& grad = gradient(V_Oth);
 	float res = normL2(grad);
 	return 1. / res;
 }
 
-float func_w3(const Mat& V_Bth)
+float func_w3m(const Mat& V_Bth)
 {
-	return func_w2(v_Bth);
+	return func_w2(V_Bth);
 }

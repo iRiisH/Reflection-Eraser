@@ -314,8 +314,14 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\image.h" />
-    <ClCompile Include="C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\correcter.cpp"  />
+    <ClInclude Include="C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\decomposition.h" />
+    <ClInclude Include="C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\initialization.h" />
+    <ClInclude Include="C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\motion.h" />
+    <ClCompile Include="C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\main.cpp"  />
     <ClCompile Include="C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\image.cpp"  />
+    <ClCompile Include="C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\decomposition.cpp"  />
+    <ClCompile Include="C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\initialization.cpp"  />
+    <ClCompile Include="C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\motion.cpp"  />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="C:/Users/Tangi/Documents/Travail/INF/INF473i/Projet/build/ZERO_CHECK.vcxproj">

@@ -75,9 +75,9 @@ Mat& gradient(const Mat& img)
 
 Mat& vecMul(const Mat& A, const Mat& v)
 {
-	assert(A.cols == v.cols * v.rows && A.rows = v.cols * v.rows);
+	assert(A.cols == v.cols * v.rows && A.rows == v.cols * v.rows);
 
-	Mat& res = Mat::zeros(v.rows, v.cols);
+	Mat res = Mat::zeros(v.rows, v.cols, CV_32F);
 
 	for (int i = 0; i < v.rows; i++)
 	{
@@ -90,6 +90,27 @@ Mat& vecMul(const Mat& A, const Mat& v)
 		}
 	}
 	return res;
+}
+
+// Correlation
+double mean(const Image<float>& I, Point m, int n) {
+	double s = 0;
+	for (int j = -n; j <= n; j++)
+		for (int i = -n; i <= n; i++)
+			s += I(m + Point(i, j));
+	return s / (2 * n + 1) / (2 * n + 1);
+}
+
+double corr(const Image<float>& I1, Point m1, const Image<float>& I2, Point m2, int n) {
+	double M1 = mean(I1, m1, n);
+	double M2 = mean(I2, m2, n);
+	double rho = 0;
+	for (int j = -n; j <= n; j++)
+		for (int i = -n; i <= n; i++) {
+			rho += (I1(m1 + Point(i, j)) - M1)*(I2(m2 + Point(i, j)) - M2);
+		}
+
+	return rho;
 }
 
 double NCC(const Image<float>& I1, Point m1, const Image<float>& I2, Point m2, int n) {
