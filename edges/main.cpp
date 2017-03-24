@@ -7,14 +7,17 @@
 #include <opencv2/video/tracking.hpp>
 
 #include <iostream>
+#include <string>
 #include <fstream>
 #include <time.h>
 
 #define P 4
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 using namespace cv;
 using namespace std;
-
 
 /// Global variables
 
@@ -178,9 +181,9 @@ void nearestNeighbourWeightedInterpolation(Mat& img)
 				{
 					Point2i pK = sparseData[k];
 					sum += img.at<float>(pK.x, pK.y) /
-						pow(pow(pK.x - i, 2.) + pow(pK.y - j, 2.), (float)P / 2.);
+						pow(pow(float (pK.x - i), 2.) + pow(float(pK.y - j), 2.), (float)P / 2.);
 					norm+= 1. /
-						pow(pow(pK.x - i, 2.) + pow(pK.y - j, 2.), (float)P / 2.);
+						pow(pow(float (pK.x - i), 2.) + pow(float (pK.y - j), 2.), (float)P / 2.);
 				}
 				img.at<float>(i, j) = sum / norm;
 			}	
@@ -193,7 +196,7 @@ void testInterpolation()
 	Mat img = Mat::zeros(300, 300, CV_32F);
 	Mat orig;
 	img.copyTo(orig);
-	srand(time(NULL));
+	srand(unsigned int (time(NULL)));
 	int m = img.rows, n = img.cols;
 	for (int i = 0; i < m; i++)
 	{
@@ -217,10 +220,10 @@ void testInterpolation()
 	waitKey(0);
 }
 
-void interpolateMotionField(vector<vector<Point2i>> v)
+void interpolateMotionField(vector<vector<Point2i>> &v)
 {
 	assert(v.size() > 0);
-	int m = v.size (), n = v[0].size ();
+	int m = v.size(), n = v[0].size();
 	Mat vx = Mat::zeros(m, n, CV_32F), vy = Mat::zeros(m, n, CV_32F);
 	for (int i = 0; i < m; i++)
 	{
@@ -231,18 +234,17 @@ void interpolateMotionField(vector<vector<Point2i>> v)
 		}
 	}
 	nearestNeighbourWeightedInterpolation(vx);
-	normalize(vx, vx, 0, 255, NORM_MINMAX);
-	imshow("vx", vx);
-	waitKey(0);
-	/*nearestNeighbourWeightedInterpolation(vy);
+	nearestNeighbourWeightedInterpolation(vy);
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)
 		{
-			v[i][j].x = (int)(vx.at<float>(i, j));
-			v[i][j].y = (int)(vy.at<float>(i, j));
+			v[i][j].x = (int)(round(vx.at<float>(i, j)));
+			v[i][j].y = (int)(round(vy.at<float>(i, j)));
+			if (v[i][j].x == 0 && v[i][j].y == 0)
+				std::cout << vx.at<float>(i, j) << " - " << vy.at<float>(i, j) << std::endl;
 		}
-	}*/
+	}
 }
 
 void saveMotionField(const vector<vector<Point2i>> v, String filename)
@@ -268,7 +270,7 @@ vector<vector<Point2i>> loadMotionField(String filename)
 	int i = 0, j = 0;
 	if (file.is_open())
 	{
-		cout << "loading motion field at ../results/" + filename << endl;
+		cout << "loading motion field at ../results/" + filename+" ...";
 		while (getline(file, line))
 		{
 			vector<Point2i> new_line;
@@ -313,6 +315,7 @@ vector<vector<Point2i>> loadMotionField(String filename)
 			i++;
 		}
 		file.close();
+		cout << "done" << endl;
 	}
 
 	else cout << "Unable to open file" << endl;;
@@ -323,14 +326,44 @@ void displayMotionField(const vector<vector<Point2i>> v, Mat& img)
 {
 	assert(v.size() > 0);
 	int m = v.size(), n = v[0].size();
-	img = Mat::zeros(m, n, CV_32F);
+	Mat x_coord = Mat::zeros(m, n, CV_32F), y_coord = Mat::zeros(m, n, CV_32F);
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)
-			img.at<float>(i, j) = pow(v[i][j].x, 2.) + pow(v[i][j].y, 2.);
+		{
+			x_coord.at<float>(i, j) = float(v[i][j].x);
+			y_coord.at<float>(i, j) = float(v[i][j].y);
+		}
 	}
-	//normalize(img, img, 0, 255, NORM_MINMAX);
-	//imshow("motion field visualization", img);
+	Mat magnitude, angle;
+	cartToPolar(x_coord, y_coord, magnitude, angle);
+	img = Mat::zeros(m, n, CV_8UC3);
+	Mat hsv;
+	cvtColor(img, hsv, COLOR_BGR2HSV);
+	
+	float max_mag = 0.;
+	for (int i = 0; i < m; i++)
+	{
+		for (int j = 0; j < n; j++)
+		{
+			float new_mag = magnitude.at<float>(i, j);
+			max_mag = new_mag > max_mag ? new_mag : max_mag;
+		}
+	}
+	for (int i = 0; i < m; i++)
+	{
+		for (int j = 0; j < n; j++)
+		{
+			Vec3b &v = hsv.at<Vec3b>(i, j);
+			v[0] =int( angle.at<float>(i,j) * 180. / M_PI / 2.);
+			v[1] = 255;
+			v[2] = int(255.*magnitude.at<float>(i, j)/max_mag);
+			///cout << v[2] << endl;
+		}
+	}
+	cvtColor(hsv, img, COLOR_HSV2BGR);
+
+	imshow("motion field visualization", img);
 	waitKey(0);
 }
 
@@ -359,12 +392,18 @@ int main(int argc, char** argv)
 	waitKey(0);
 	interpolateMotionField(v1);
 	saveMotionField(v1, "result.txt");*/
-	vector<vector<Point2i>> v;
-	v = loadMotionField("result.txt");
-	Mat img;
-
-	displayMotionField(v, img);
-	imshow("img", img);
-	waitKey(0);
+	vector<vector<Point2i>> v1, v2;
+	v1 = loadMotionField("v1.txt");
+	v2 = loadMotionField("v2.txt");
+	interpolateMotionField(v1);
+	interpolateMotionField(v2);
+	saveMotionField(v1, "v1_interpolated.txt");
+	saveMotionField(v2, "v2_interpolated.txt");
+	Mat img1, img2;
+	//interpolateMotionField(v);
+	//saveMotionField(v, "v1_interpolated.txt");
+	displayMotionField(v1, img1);
+	displayMotionField(v2, img2);
+	
 	return 0;
 }
