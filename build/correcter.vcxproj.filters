@@ -16,6 +16,9 @@
     <ClCompile Include="C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\motion.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\interpolation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\image.h">
@@ -28,6 +31,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\motion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\interpolation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
