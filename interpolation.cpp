@@ -1,5 +1,7 @@
 #include "image.h"
 #include "interpolation.h"
+#include <time.h>
+#define P 4
 
 void nearestNeighbourWeightedInterpolation(Mat& img)
 {

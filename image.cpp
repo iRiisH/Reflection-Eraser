@@ -18,6 +18,7 @@ float normL2(const Mat& img)
 			squared_sum += pow(val, 2);
 		}
 	}
+	return squared_sum;
 }
 
 float phi(float x)

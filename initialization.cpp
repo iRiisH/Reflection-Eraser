@@ -15,7 +15,7 @@
 #include "interpolation.h"
 #include "initialization.h"
 
-#define P 4
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -60,9 +60,7 @@ void detectEdges(string filename)
 	waitKey(0);
 }
 
-struct Fields {
-	vector<vector<Point2i>> v1, v2;
-};
+
 
 Fields detectSparseMotion(Mat& I1, Mat& I2)
 {
@@ -301,48 +299,3 @@ void estimateInitialBackground(vector<vector<Point2i>> v_b, const Mat& I1, const
 	waitKey(0);
 }
 
-int main(int argc, char** argv)
-{
-	Mat I1 = imread("../edges1_red.png");
-	Mat I2 = imread("../edges2_red.png");
-	int m = I1.rows, n = I1.cols;
-	Mat F1, F2, G1, G2;
-
-	// uses canny edges detector
-	//detectEdges("im2_red.png");
-
-	// detects the sparse motion field of the edges, then interpolates it to the whole space
-	Fields f = detectSparseMotion(I1, I2);
-
-	interpolateMotionField(f.v1);
-	interpolateMotionField(f.v2);
-	saveMotionField(f.v1, "v1_red.txt");
-	saveMotionField(f.v2, "v2_red.txt");
-
-	/*// loads the previously saved motion field
-	vector<vector<Point2i>> v1, v2;
-	v1 = loadMotionField("v1_red.txt");
-	v2 = loadMotionField("v2_red.txt");
-
-	Mat img;
-	I1.copyTo(img);
-	///displayMotionField(v1, img);
-	srand(time(NULL));
-	for (int i = 0; i < m; i++)
-	{
-	for (int j = 0; j < n; j++)
-	{
-	Point2i p1(j, i), p2(v1[i][j]);
-	int test = rand() % 100;
-	if (test <= 1)
-	arrowedLine(I1, p1, p2, Scalar(255, 0, 0));
-
-	}
-	}
-
-
-	imshow("I1", I1);
-	waitKey(0);
-	*/
-	return 0;
-}

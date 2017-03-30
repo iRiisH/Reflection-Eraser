@@ -28,7 +28,7 @@ float func_w2d(const Mat& I_Bh)
 
 float func_w3d(const Mat& I_Oh)
 {
-	return func_w2(I_Oh); // w2 and w3 are the exact same function, yet for the code
+	return func_w2d(I_Oh); // w2 and w3 are the exact same function, yet for the code
 						  // to be clear we create two separate functions
 }
 
@@ -40,9 +40,9 @@ float L(const Mat& I_O, const Mat& I_Oh, const Mat& I_B, const Mat& I_Bh)
 	{
 		for (int j = 0; j < DI_O.cols; j++)
 		{
-			sum += DI_Oh * DI_B;
-			sum += DI_O * DI_Bh;
-			sum -= DI_Oh * DI_Bh;
+			res += DI_Oh.at<float>(i,j) * DI_B.at<float>(i,j);
+			res += DI_O.at<float>(i,j) * DI_Bh.at<float>(i,j);
+			res -= DI_Oh.at<float>(i,j) * DI_Bh.at<float>(i,j);
 		}
 	}
 	return res;

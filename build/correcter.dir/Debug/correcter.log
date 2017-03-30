@@ -1,0 +1,5 @@
+﻿  motion.cpp
+C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\motion.cpp(10): warning C4244: 'return' : conversion de 'double' en 'float', perte possible de données
+C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\motion.cpp(17): warning C4244: 'return' : conversion de 'double' en 'float', perte possible de données
+c:\users\tangi\documents\travail\inf\inf473i\projet\motion.cpp(8): warning C4700: variable locale 'pB' non initialisée utilisée
+  correcter.vcxproj -> C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\build\Debug\correcter.exe

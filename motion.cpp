@@ -19,5 +19,5 @@ float func_w2m(const Mat& V_Oth)
 
 float func_w3m(const Mat& V_Bth)
 {
-	return func_w2(V_Bth);
+	return func_w2m(V_Bth);
 }
