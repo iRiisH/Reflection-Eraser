@@ -20,16 +20,20 @@
 #define M_PI 3.14159265358979323846
 #endif
 
+#define EDGES_THRESHOLD 45
+
 using namespace cv;
 using namespace std;
 
 void detectEdges(const Mat& inArray, Mat& outArray, int threshold)
 {
 	int kernel_size = 3, ratio = 3;
-	Mat temp;
-	temp = Mat::zeros(inArray.size(), inArray.type());
+	Mat temp, temp2;
+	temp = temp2 = Mat::zeros(inArray.size(), inArray.type());
+	outArray = Mat::zeros(inArray.size(), inArray.type());
 	blur(inArray, temp, Size(3, 3));
-	Canny(temp, outArray, threshold, threshold*ratio, kernel_size);
+	Canny(temp, temp2, threshold, threshold*ratio, kernel_size);
+	inArray.copyTo(outArray, temp2);
 }
 
 void detectEdges(const vector<Mat>& inArray, vector<Mat>& outArray, int threshold)
@@ -53,7 +57,6 @@ Fields detectSparseMotion(Mat& I1, Mat& I2)
 
 	Mat flow;
 	calcOpticalFlowFarneback(F1, F2, flow, 0.5, 3, 15, 3, 5, 1.2, 0);
-
 	vector<Point2i> obj, scene;
 	int m = F1.rows, n = F1.cols;
 	for (int i = 0; i < m; i += 4)
@@ -282,6 +285,7 @@ void estimateInitialBackground(vector<vector<Point2i>> v_b, const Mat& I1, const
 void loadImages(vector<Mat>& images, Mat& im_ref)
 {
 	assert(images.size() == 4);
+	cout << "Loading data..." << endl;
 	String path = "../images/half/";
 	images[0] = imread(path+"im1.png");
 	images[1] = imread(path+"im2.png");
@@ -290,3 +294,49 @@ void loadImages(vector<Mat>& images, Mat& im_ref)
 	im_ref = imread(path+"im3.png");
 }
 
+void initialize(vector<Mat>& images, Mat& img_ref, vector<Fields>& motionFields, Mat& I_O, Mat& I_B)
+{
+	vector<Mat> edges(N_IMGS);
+	Mat edges_ref;
+
+	cout << "Computing edges..." << endl;
+	detectEdges(images, edges, EDGES_THRESHOLD);
+	detectEdges(img_ref, edges_ref, EDGES_THRESHOLD);
+
+	vector<Fields> f(N_IMGS);
+	Mat warpedImages[N_IMGS];
+	cout << "Detecting edge flow..." << endl;
+	for (int i = 0; i < N_IMGS; i++)
+		f[i] = detectSparseMotion(edges[i], edges_ref);
+
+	cout << "Interpolating motion field..." << endl;
+	for (int i = 0; i < N_IMGS; i++)
+	{
+		interpolateMotionField2(f[i].v1);
+		interpolateMotionField2(f[i].v2);
+		warpImage<Vec3b>(images[i], warpedImages[i], f[i].v1);
+	}
+
+	cout << "Computing initial values for Io and Ib..." << endl;
+	int m = img_ref.rows, n = img_ref.cols;
+	Mat res = Mat::zeros(img_ref.size(), img_ref.type());
+	for (int i = 0; i < m; i++)
+	{
+		for (int j = 0; j < n; j++)
+		{
+			vector<int> l;
+			for (int k = 0; k < N_IMGS; k++)
+			{
+				Vec3b val = images[k].at<Vec3b>(i, j);
+				l.push_back(val[0] + val[1] + val[2]);
+			}
+			int ind = min<int>(l);
+			res.at<Vec3b>(i, j) = images[ind].at<Vec3b>(i, j);
+		}
+	}
+	motionFields = f;
+	I_O = res;
+	imshow("Initialisation", res);
+	imwrite("../result.png", res);
+	waitKey(0);
+}
