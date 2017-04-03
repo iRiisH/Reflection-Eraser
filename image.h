@@ -59,3 +59,21 @@ void warpImage(const Mat& inImg, Mat& outImg, vector<vector<Point2i>> warpingFie
 		}
 	}
 }
+
+template<typename T>
+int min(vector<T> list)
+{
+	assert(list.size() > 0);
+	int n = list.size();
+	T val = list[0];
+	int ind = 0;
+	for (int i = 1; i < n; i++)
+	{
+		if (list[i] < val)
+		{
+			val = list[i];
+			ind = i;
+		}
+	}
+	return ind;
+}

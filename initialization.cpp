@@ -23,44 +23,24 @@
 using namespace cv;
 using namespace std;
 
-/// Global variables
-
-Mat src, src_gray;
-Mat dst, detected_edges;
-
-
-int edgeThresh = 1;
-int lowThreshold;
-int const max_lowThreshold = 100;
-int ratio = 3;
-int kernel_size = 3;
-char* window_name = "Edge Map";
-
-void CannyThreshold(int, void*)
+void detectEdges(const Mat& inArray, Mat& outArray, int threshold)
 {
-	/// Reduce noise with a kernel 3x3
-	blur(src_gray, detected_edges, Size(3, 3));
-	/// Canny detector
-	Canny(detected_edges, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size);
-	/// Using Canny's output as a mask, we display our result
-	dst = Scalar::all(0);
-	src.copyTo(dst, detected_edges);
-	imshow(window_name, dst);
+	int kernel_size = 3, ratio = 3;
+	Mat temp;
+	temp = Mat::zeros(inArray.size(), inArray.type());
+	blur(inArray, temp, Size(3, 3));
+	Canny(temp, outArray, threshold, threshold*ratio, kernel_size);
 }
 
-
-void detectEdges(string filename)
+void detectEdges(const vector<Mat>& inArray, vector<Mat>& outArray, int threshold)
 {
-	src = imread("../" + filename);
-	dst.create(src.size(), src.type());
-	cvtColor(src, src_gray, CV_BGR2GRAY);
-	namedWindow(window_name, CV_WINDOW_AUTOSIZE);
-	createTrackbar("Min Threshold:", window_name, &lowThreshold, max_lowThreshold, CannyThreshold);
-	CannyThreshold(0, 0);
-	waitKey(0);
+	assert(inArray.size() == outArray.size());
+	int N = inArray.size();
+	for (int i = 0; i < N; i++)
+	{
+		detectEdges(inArray[i], outArray[i], threshold);
+	}
 }
-
-
 
 Fields detectSparseMotion(Mat& I1, Mat& I2)
 {
@@ -297,5 +277,16 @@ void estimateInitialBackground(vector<vector<Point2i>> v_b, const Mat& I1, const
 	normalize(img, img, 0., 1., NORM_MINMAX);
 	imshow("img", img);
 	waitKey(0);
+}
+
+void loadImages(vector<Mat>& images, Mat& im_ref)
+{
+	assert(images.size() == 4);
+	String path = "../images/half/";
+	images[0] = imread(path+"im1.png");
+	images[1] = imread(path+"im2.png");
+	images[2] = imread(path+"im4.png");
+	images[3] = imread(path+"im5.png");
+	im_ref = imread(path+"im3.png");
 }
 

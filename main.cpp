@@ -6,45 +6,45 @@
 
 #include <time.h>
 
+#define EDGES_THRESHOLD 45
+#define N_IMGS 4
+
 int main(int argc, char** argv)
 {
-	Mat I1 = imread("../edges1_red.png");
-	Mat I2 = imread("../edges2_red.png");
-	Mat I1_color = imread("../im1_red.png");
-	Mat I2_color = imread("../im2_red.png");
-	int m = I1.rows, n = I1.cols;
-	Mat F1, F2, G1, G2;
-	I1.convertTo(F1, CV_32F);
-	// uses canny edges detector
-	//detectEdges("im2_red.png");
+	vector<Mat> imgs(N_IMGS), edges(N_IMGS);
+	Mat img_ref;
+	loadImages(imgs, img_ref);
+	detectEdges(imgs, edges, EDGES_THRESHOLD);
 
-	// detects the sparse motion field of the edges, then interpolates it to the whole space
-	Fields f = detectSparseMotion(I1, I2);
-	/*for (int i = 0; i < m; i++)
+	Fields f[N_IMGS];
+	Mat warpedImages[N_IMGS];
+	for (int i = 0; i < N_IMGS; i++)
+	{
+		f[i] = detectSparseMotion(imgs[i], img_ref);
+		interpolateMotionField2(f[i].v1);
+		interpolateMotionField2(f[i].v2);
+		warpImage<Vec3b>(imgs[i], warpedImages[i], f[i].v1);
+	}
+
+	int m = img_ref.rows, n = img_ref.cols;
+	Mat res = Mat::zeros(img_ref.size(), img_ref.type());
+	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)
 		{
-			if (f.v1[i][j].x != 0 && f.v1[i][j].y != 0)
+			vector<int> l;
+			for (int k = 0; k < N_IMGS; k++)
 			{
-				arrowedLine(I1, Point2f(j, i), Point2f(j+f.v1[i][j].x, i+f.v1[i][j].y), Scalar(0, 0, 255));
+				Vec3b val = imgs[k].at<Vec3b>(i, j);
+				l.push_back(val[0] + val[1] + val[2]);
 			}
+			int ind = min<int>(l);
+			res.at<Vec3b>(i, j) = imgs[ind].at<Vec3b> (i, j);
 		}
-	}*/
-	//imshow("I1", I1);
-	//waitKey(0);
-	Subdiv2D subdiv = createDelaunayTriangulation(f.v1);
-	//draw_subdiv(I1, subdiv, Scalar(255, 255, 255));
-
-	interpolateMotionField2(f.v1);
-
-	Mat img;
-	I1.copyTo(img);
-
-	warpImage<Vec3b>(I1_color, img, f.v1);
-	imshow("img", img);
+	}
+	imshow("Initialisation", res);
+	imwrite("../result.png", res);
 	waitKey(0);
-	//displayMotionField(f.v1, I1);
-	//imwrite("v1.png", I1);
 
 	return 0;
 }
