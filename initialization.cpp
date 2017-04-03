@@ -114,7 +114,7 @@ Fields detectSparseMotion(Mat& I1, Mat& I2)
 		if (mask.at<uchar>(i, 0) != 0)
 		{
 			//arrowedLine(I1, scene[i], obj[i], Scalar(0, 255, 0));
-			v1[scene[i].y][scene[i].x] = obj[i];
+			v1[scene[i].y][scene[i].x] = Point2i(obj[i].x-scene[i].x, obj[i].y -scene[i].y);
 		}
 		else
 		{
@@ -136,7 +136,7 @@ Fields detectSparseMotion(Mat& I1, Mat& I2)
 			if (new_mask.at<uchar>(i, 0) != 0)
 			{
 				//arrowedLine(I1, new_scene[i], new_obj[i], colors[nb]);
-				v2[new_scene[i].y][new_scene[i].x] = new_obj[i];
+				v2[new_scene[i].y][new_scene[i].x] = Point2i(new_obj[i].x - new_scene[i].x, new_obj[i].y - new_scene[i].y);
 			}
 			else
 			{
