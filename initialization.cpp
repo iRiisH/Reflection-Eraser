@@ -16,33 +16,27 @@
 #include "initialization.h"
 
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
-#define EDGES_THRESHOLD 45
-
 using namespace cv;
 using namespace std;
 
-void detectEdges(const Mat& inArray, Mat& outArray, int threshold)
+void detectEdges(const Mat& inArray, Mat& outArray)
 {
-	int kernel_size = 3, ratio = 3;
+	int kernel_size = 3;
 	Mat temp, temp2;
 	temp = temp2 = Mat::zeros(inArray.size(), inArray.type());
 	outArray = Mat::zeros(inArray.size(), inArray.type());
 	blur(inArray, temp, Size(3, 3));
-	Canny(temp, temp2, threshold, threshold*ratio, kernel_size);
+	Canny(temp, temp2, EDGES_THRESHOLD, EDGES_THRESHOLD*EDGES_RATIO, kernel_size);
 	inArray.copyTo(outArray, temp2);
 }
 
-void detectEdges(const vector<Mat>& inArray, vector<Mat>& outArray, int threshold)
+void detectEdges(const vector<Mat>& inArray, vector<Mat>& outArray)
 {
 	assert(inArray.size() == outArray.size());
 	int N = inArray.size();
 	for (int i = 0; i < N; i++)
 	{
-		detectEdges(inArray[i], outArray[i], threshold);
+		detectEdges(inArray[i], outArray[i]);
 	}
 }
 
@@ -57,8 +51,10 @@ Fields detectSparseMotion(Mat& I1, Mat& I2)
 
 	Mat flow;
 	calcOpticalFlowFarneback(F1, F2, flow, 0.5, 3, 15, 3, 5, 1.2, 0);
+
+	int m = I1.rows, n = I1.cols;
+
 	vector<Point2i> obj, scene;
-	int m = F1.rows, n = F1.cols;
 	for (int i = 0; i < m; i += 4)
 	{
 		for (int j = 0; j < n; j += 4)
@@ -107,13 +103,11 @@ Fields detectSparseMotion(Mat& I1, Mat& I2)
 	}
 
 	Scalar colors[3] = { Scalar(0, 0, 255), Scalar(51, 0, 102), Scalar(255, 128, 0) };
-	int N = 1;
 
-	for (int nb = 0; nb < N; nb++)
+	Mat new_mask;
+	if (!new_scene.empty())
 	{
-		Mat new_mask;
 		findHomography(new_scene, new_obj, new_mask, RANSAC);
-		vector<Point2i> rms, rmo;
 		for (int i = 0; i < new_mask.rows; i++)
 		{
 			if (new_mask.at<uchar>(i, 0) != 0)
@@ -121,18 +115,20 @@ Fields detectSparseMotion(Mat& I1, Mat& I2)
 				//arrowedLine(I1, new_scene[i], new_obj[i], colors[nb]);
 				v2[new_scene[i].y][new_scene[i].x] = Point2i(new_obj[i].x - new_scene[i].x, new_obj[i].y - new_scene[i].y);
 			}
-			else
-			{
-				rms.push_back(new_scene[i]);
-				rmo.push_back(new_obj[i]);
-			}
-
 		}
-		new_scene = rms; new_obj = rmo;
+	}
+	else
+	{
+		for (int i = 0; i < m; i++)
+		{
+			for (int j = 0; j < n; j++)
+				v2[i][j] = Point2i(v1[i][j].x, v1[i][j].y);
+		}
 	}
 	Fields f;
 	f.v1 = v1;
 	f.v2 = v2;
+
 	return f;
 	//	imshow("I1", I1);
 	//	waitKey(0);
@@ -284,30 +280,41 @@ void estimateInitialBackground(vector<vector<Point2i>> v_b, const Mat& I1, const
 
 void loadImages(vector<Mat>& images, Mat& im_ref)
 {
-	assert(images.size() == 4);
+	String path = PATH;
+	assert(images.size() == N_IMGS);
 	cout << "Loading data..." << endl;
-	String path = "../images/half/";
-	images[0] = imread(path+"im1.png");
-	images[1] = imread(path+"im2.png");
-	images[2] = imread(path+"im4.png");
-	images[3] = imread(path+"im5.png");
-	im_ref = imread(path+"im3.png");
+	int i = 0;
+	for (; i < (N_IMGS + 1) / 2; i++)
+		images[i] = imread(path + "im" + to_string(i + 1) + ".png");
+	im_ref = imread(path + "im" + to_string(i+1) + ".png");
+
+	for (; i < N_IMGS; i++)
+		images[i] = imread(path + "im" + to_string(i + 2) + ".png");
+
+	if (RESIZE)
+	{
+		for (int i = 0; i < N_IMGS; i++)
+			resize(images[i], images[i], Size2i(0, 0), RESIZE_RATIO, RESIZE_RATIO);
+		resize(im_ref, im_ref, Size2i(0, 0), RESIZE_RATIO, RESIZE_RATIO);
+	}
 }
 
 void initialize(vector<Mat>& images, Mat& img_ref, vector<Fields>& motionFields, Mat& I_O, Mat& I_B)
 {
 	vector<Mat> edges(N_IMGS);
 	Mat edges_ref;
+	int m = img_ref.rows, n = img_ref.cols;
 
 	cout << "Computing edges..." << endl;
-	detectEdges(images, edges, EDGES_THRESHOLD);
-	detectEdges(img_ref, edges_ref, EDGES_THRESHOLD);
+	detectEdges(images, edges);
+	detectEdges(img_ref, edges_ref);
 
 	vector<Fields> f(N_IMGS);
 	Mat warpedImages[N_IMGS];
 	cout << "Detecting edge flow..." << endl;
 	for (int i = 0; i < N_IMGS; i++)
 		f[i] = detectSparseMotion(edges[i], edges_ref);
+
 
 	cout << "Interpolating motion field..." << endl;
 	for (int i = 0; i < N_IMGS; i++)
@@ -318,7 +325,6 @@ void initialize(vector<Mat>& images, Mat& img_ref, vector<Fields>& motionFields,
 	}
 
 	cout << "Computing initial values for Io and Ib..." << endl;
-	int m = img_ref.rows, n = img_ref.cols;
 	Mat res = Mat::zeros(img_ref.size(), img_ref.type());
 	for (int i = 0; i < m; i++)
 	{
@@ -330,8 +336,12 @@ void initialize(vector<Mat>& images, Mat& img_ref, vector<Fields>& motionFields,
 				Vec3b val = images[k].at<Vec3b>(i, j);
 				l.push_back(val[0] + val[1] + val[2]);
 			}
-			int ind = min<int>(l);
-			res.at<Vec3b>(i, j) = images[ind].at<Vec3b>(i, j);
+			int ind = min_ind<int>(l);
+			Vec3b val_temp = images[ind].at<Vec3b>(i, j);
+			Vec3b val = img_ref.at<Vec3b>(i, j);
+			Vec3b min_val = (val[0] + val[1] + val[2] <
+				val_temp[0] + val_temp[1] + val_temp[2]) ? val : val_temp;
+			res.at<Vec3b>(i, j) = min_val;
 		}
 	}
 	motionFields = f;

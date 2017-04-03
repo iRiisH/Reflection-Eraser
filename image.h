@@ -6,6 +6,17 @@
 #include <iostream>
 #include <fstream>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+#define N_IMGS 4
+#define PATH "../images/half/"
+#define RESIZE false
+#define RESIZE_RATIO 0.5
+#define EDGES_THRESHOLD 20
+#define EDGES_RATIO 3
+
 using namespace cv;
 using namespace std;
 
@@ -61,7 +72,7 @@ void warpImage(const Mat& inImg, Mat& outImg, vector<vector<Point2i>> warpingFie
 }
 
 template<typename T>
-int min(vector<T> list)
+int min_ind(vector<T> list)
 {
 	assert(list.size() > 0);
 	int n = list.size();

@@ -5,15 +5,13 @@
 
 #include <iostream>
 
-#define N_IMGS 4
-
 struct Fields
 {
 	vector<vector<Point2i>> v1, v2;
 };
 
-void detectEdges(const Mat& inArray, Mat& outArray, int threshold);
-void detectEdges(const vector<Mat>& inArray, vector<Mat>& outArray, int threshold);
+void detectEdges(const Mat& inArray, Mat& outArray);
+void detectEdges(const vector<Mat>& inArray, vector<Mat>& outArray);
 Fields detectSparseMotion(Mat& I1, Mat& I2);
 void saveMotionField(const vector<vector<Point2i>> v, String filename);
 vector<vector<Point2i>> loadMotionField(String filename);
