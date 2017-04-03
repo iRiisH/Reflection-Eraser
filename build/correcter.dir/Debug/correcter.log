@@ -1,3 +1,1 @@
-﻿  main.cpp
-C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\main.cpp(28): warning C4244: 'argument' : conversion de 'int' en 'float', perte possible de données
-  correcter.vcxproj -> C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\build\Debug\correcter.exe
+﻿C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppCommon.targets(355,5): error MSB6003: Impossible d'exécuter la tâche exécutable spécifiée "CL.exe". Le processus ne peut pas accéder au fichier 'C:\USERS\TANGI\DOCUMENTS\TRAVAIL\INF\INF473I\PROJET\BUILD\CORRECTER.DIR\DEBUG\INITIALIZATION.OBJ', car il est en cours d'utilisation par un autre processus.

@@ -40,3 +40,22 @@ Mat& Dy(const Mat& img);
 Mat& gradient(const Mat& img);
 Mat& vecMul(const Mat& A, const Mat& v);
 double NCC(const Image<float>& I1, Point m1, const Image<float>& I2, Point m2, int n);
+bool rectContains(int m, int n, Point2i p);
+
+template<typename T>
+void warpImage(const Mat& inImg, Mat& outImg, vector<vector<Point2i>> warpingField)
+{
+	assert(warpingField.size() > 0);
+	assert(warpingField.size() == inImg.rows && warpingField[0].size() == inImg.cols);
+	int m = inImg.rows, n = inImg.cols, mat_type = inImg.type();
+	outImg = Mat::zeros(m, n, mat_type);
+	for (int i = 0; i < m; i++)
+	{
+		for (int j = 0; j < n; j++)
+		{
+			Point2i p(j - warpingField[i][j].x, i - warpingField[i][j].y);
+			if (rectContains(m, n, p))
+				outImg.at<T>(i, j) = inImg.at<T>(p);
+		}
+	}
+}

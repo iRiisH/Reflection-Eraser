@@ -123,3 +123,9 @@ double NCC(const Image<float>& I1, Point m1, const Image<float>& I2, Point m2, i
 	if (c2 == 0) return -1;
 	return corr(I1, m1, I2, m2, n) / sqrt(c1*c2);
 }
+
+bool rectContains(int m, int n, Point2i p)
+{
+	Rect r(0, 0, n, m);
+	return r.contains(p);
+}
