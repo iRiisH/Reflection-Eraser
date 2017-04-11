@@ -63,7 +63,7 @@ Fields detectSparseMotion(Mat& I1, Mat& I2)
 			{
 				const Point2f& fxy = flow.at<Point2f>(i, j);
 				Point2i p2(cvRound(j + fxy.x), cvRound(i + fxy.y));
-				//line(I1, Point2i (j, i), p2, Scalar(0, 255, 0));
+				//arrowedLine(img, Point2i (j, i), p2, Scalar(255, 0, 0));
 				//circle(I1, Point2i(j, i), 1, Scalar(255, 0, 0));
 
 				scene.push_back(Point2i(j, i));
@@ -71,6 +71,7 @@ Fields detectSparseMotion(Mat& I1, Mat& I2)
 			}
 		}
 	}
+	
 	Mat mask;
 	findHomography(scene, obj, mask, RANSAC);
 
@@ -92,7 +93,7 @@ Fields detectSparseMotion(Mat& I1, Mat& I2)
 	{
 		if (mask.at<uchar>(i, 0) != 0)
 		{
-			//arrowedLine(I1, scene[i], obj[i], Scalar(0, 255, 0));
+			//arrowedLine(img, scene[i], obj[i], Scalar(0, 255, 0));
 			v1[scene[i].y][scene[i].x] = Point2i(obj[i].x-scene[i].x, obj[i].y -scene[i].y);
 		}
 		else
@@ -112,7 +113,7 @@ Fields detectSparseMotion(Mat& I1, Mat& I2)
 		{
 			if (new_mask.at<uchar>(i, 0) != 0)
 			{
-				//arrowedLine(I1, new_scene[i], new_obj[i], colors[nb]);
+				//arrowedLine(img, new_scene[i], new_obj[i], Scalar(0, 0, 255));
 				v2[new_scene[i].y][new_scene[i].x] = Point2i(new_obj[i].x - new_scene[i].x, new_obj[i].y - new_scene[i].y);
 			}
 		}
@@ -308,7 +309,8 @@ void initialize(vector<Mat>& images, Mat& img_ref, vector<Fields>& motionFields,
 	cout << "Computing edges..." << endl;
 	detectEdges(images, edges);
 	detectEdges(img_ref, edges_ref);
-
+	imshow("test", edges_ref);
+	waitKey(0);
 	vector<Fields> f(N_IMGS);
 	Mat warpedImages[N_IMGS];
 	cout << "Detecting edge flow..." << endl;
