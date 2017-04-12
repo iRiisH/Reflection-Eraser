@@ -43,15 +43,19 @@ public:
 		return g;
 	}
 };
-
+float normL1(const Mat& img);
 float normL2(const Mat& img);
 float phi(float x);
 Mat& Dx(const Mat& img);
 Mat& Dy(const Mat& img);
 Mat& gradient(const Mat& img);
 Mat& vecMul(const Mat& A, const Mat& v);
+Mat& imgMinus(const Mat& I1, const Mat& I2);
 double NCC(const Image<float>& I1, Point m1, const Image<float>& I2, Point m2, int n);
 bool rectContains(int m, int n, Point2i p);
+float gradient_normL1(const Mat& img);
+Mat& warpedImage(const Mat& I, const vector<vector<Point2i>> &v);
+float min(const Mat& img);
 
 template<typename T>
 void warpImage(const Mat& inImg, Mat& outImg, vector<vector<Point2i>> warpingField)
@@ -88,3 +92,4 @@ int min_ind(vector<T> list)
 	}
 	return ind;
 }
+

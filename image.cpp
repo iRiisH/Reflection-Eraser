@@ -21,6 +21,22 @@ float normL2(const Mat& img)
 	return squared_sum;
 }
 
+float normL1(const Mat& img)
+{
+	assert(img.depth() == CV_32F);
+	int m = img.rows, n = img.cols;
+	float sum = 0.;
+	for (int i = 0; i < m; i++)
+	{
+		for (int j = 0; j < n; j++)
+		{
+			float val = img.at<float>(i, j);
+			sum += abs(val);
+		}
+	}
+	return sum;
+}
+
 float phi(float x)
 {
 	return sqrt(x + pow(EPSILON, 2));
@@ -74,6 +90,39 @@ Mat& gradient(const Mat& img)
 	return grad;
 }
 
+float gradient_normL1(const Mat& img)
+{
+	int m = img.rows, n = img.cols;
+	float res = 0.;
+	for (int i = 0; i < m - 1; i++)
+	{
+		for (int j = 0; j < n; j++)
+		{
+			float dx = img.at<float>(i, j + 1) - img.at<float>(i, j);
+			float dy = img.at<float>(i + 1, j) - img.at<float>(i, j);
+			res += abs(dx) + abs(dy);
+		}
+	}
+	return res;
+}
+
+Mat& warpedImage(const Mat& I, const vector<vector<Point2i>> &v)
+{
+	assert(v.size() > 0);
+	int m = I.rows, n = I.cols;
+	assert(v.size() == m && v[0].size() == n);
+	Mat res = Mat::zeros(m, n, I.type());
+	for (int i = 0; i < m; i++)
+	{
+		for (int j = 0; j < n; j++)
+		{
+			Point2i p = v[i][j];
+			res.at<Vec3b>(i, j) = res.at<Vec3b>(i - p.x, j - p.y);
+		}
+	}
+	return res;
+}
+
 Mat& vecMul(const Mat& A, const Mat& v)
 {
 	assert(A.cols == v.cols * v.rows && A.rows == v.cols * v.rows);
@@ -89,6 +138,18 @@ Mat& vecMul(const Mat& A, const Mat& v)
 				sum += A.at<float>(i + j*v.rows, k);
 			res.at<float>(i, j) = sum;
 		}
+	}
+	return res;
+}
+
+Mat& imgMinus(const Mat& I1, const Mat& I2)
+{
+	assert(I1.type() == CV_32F);
+	Mat res = Mat::zeros(m, n, CV_32F);
+	for (int i = 0; i < m; i++)
+	{
+		for (int j = 0; j < n; j++)
+			res.at<float>(i, j) = I1.at<float>(i, j) - I2.at<float>(i, j);
 	}
 	return res;
 }
@@ -128,4 +189,20 @@ bool rectContains(int m, int n, Point2i p)
 {
 	Rect r(0, 0, n, m);
 	return r.contains(p);
+}
+
+float min(const Mat& img)
+{
+	assert(img.type() == CV_32F);
+	int m = img.rows, n = img.cols;
+	float min = 0.;
+	for (int i = 0; i < m; i++)
+	{
+		for (int j = 0; j < n; j++)
+		{
+			float val = img.at<float>(i, j);
+			min = (val < min) ? val : min;
+		}
+	}
+	return min;
 }

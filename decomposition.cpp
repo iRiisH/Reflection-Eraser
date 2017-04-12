@@ -32,6 +32,19 @@ float func_w3d(const Mat& I_Oh)
 						  // to be clear we create two separate functions
 }
 
+float L(const Mat& I_O, const Mat& I_B)
+{
+	Mat DI_O = gradient(I_O), DI_B = gradient(I_B);
+	float res = 0.;
+	int m = I_O.rows, n = I_O.cols;
+	for (int i = 0; i < m; i++)
+	{
+		for (int j = 0; j < n; j++)
+			res += DI_O.at<float>(i, j) * DI_B.at<float>(i, j);
+	}
+	return res;
+}
+
 float L(const Mat& I_O, const Mat& I_Oh, const Mat& I_B, const Mat& I_Bh)
 {
 	Mat DI_O = gradient(I_O), DI_B = gradient(I_B), DI_Oh = gradient(I_Oh), DI_Bh = gradient(I_Bh);
@@ -48,3 +61,46 @@ float L(const Mat& I_O, const Mat& I_Oh, const Mat& I_B, const Mat& I_Bh)
 	return res;
 }
 
+float objective (const Mat& I_O, const Mat& I_B, const vector<vector<vector<Point2i>>> &V_O_list,
+	const vector<vector<vector<Point2i>>> &V_B_list, const vector<Mat&> imgs, const Mat& img_ref)
+{
+	// be careful that the images are all CV_32F (float) format
+	assert(I_O.type() == CV_32F);
+	float obj = 0.;
+
+	// natural image smoothness :
+	// heavy-tailed distribution on the gradient
+	float t_smooth = gradient_normL1(I_O) + gradient_normL1(I_B);
+	t_smooth *= LAMBDA2;
+	obj += t_smooth;
+
+	// gradient ownership term
+	float t_ownership = LAMBDA3 * L(I_O, I_B);
+	obj += t_ownership;
+
+	// negativity penalty
+	int m = I_O.rows, n = I_O.cols;
+	float t_negativity = pow(min(I_B), 2.);
+	t_negativity += pow(min(I_O), 2.);
+	t_negativity += pow(min(imgMinus (Mat::ones (m, n, CV_32F), I_B)), 2.);
+	t_negativity += pow(min(imgMinus(Mat::ones(m, n, CV_32F), I_O)), 2.);
+	obj += t_negativity;
+
+	// objective term
+	Mat temp = imgMinus(img_ref, I_O);
+	float t_main = normL1(imgMinus(temp, I_B));
+	for (int i = 0; i < N_IMGS; i++)
+	{
+		vector<vector<Point2i>> V_O = V_O_list[i], V_B = V_B_list[i];
+		Mat I_O_mod = warpedImage(I_O, V_O), I_B_mod = warpedImage(I_B, V_B);
+		Mat temp2 = imgMinus(imgs[i], I_O_mod);
+		t_main += normL1(imgMinus(temp2, I_B_mod));
+	}
+	obj += t_main;
+
+	return obj;
+}
+
+void decompose()
+{
+}
