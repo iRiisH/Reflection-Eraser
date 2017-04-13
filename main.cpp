@@ -18,5 +18,11 @@ int main(int argc, char** argv)
 	Mat I_O, I_B;
 	initialize(imgs, img_ref, f, I_O, I_B);
 
+	int N = 4;
+	for (int k = 0; k < N; k++)
+	{
+		//decompose(I_O, I_B);
+	}
+
 	return 0;
 }

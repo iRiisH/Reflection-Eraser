@@ -300,19 +300,21 @@ void loadImages(vector<Mat>& images, Mat& im_ref)
 	}
 }
 
-void initialize(vector<Mat>& images, Mat& img_ref, vector<Fields>& motionFields, Mat& I_O, Mat& I_B)
+void initialize(vector<Mat>& images, Mat& img_ref, vector<Fields>& motionFields, Mat& I_O, Mat& I_B,
+	vector<vector<vector<Point2i>>>& V_O_list, vector<vector<vector<Point2i>>>& V_B_list)
 {
 	vector<Mat> edges(N_IMGS);
 	Mat edges_ref;
 	int m = img_ref.rows, n = img_ref.cols;
-
+	V_O_list = vector<vector<vector<Point2i>>>(N_IMGS),
+		V_B_list = vector<vector<vector<Point2i>>>(N_IMGS);
 	cout << "Computing edges..." << endl;
 	detectEdges(images, edges);
 	detectEdges(img_ref, edges_ref);
-	imshow("test", edges_ref);
-	waitKey(0);
+	//imshow("test", edges_ref);
+	//waitKey(0);
 	vector<Fields> f(N_IMGS);
-	Mat warpedImages[N_IMGS];
+	Mat warpedImages[N_IMGS];// warpedReflections[N_IMGS];
 	cout << "Detecting edge flow..." << endl;
 	for (int i = 0; i < N_IMGS; i++)
 		f[i] = detectSparseMotion(edges[i], edges_ref);
@@ -323,11 +325,15 @@ void initialize(vector<Mat>& images, Mat& img_ref, vector<Fields>& motionFields,
 	{
 		interpolateMotionField2(f[i].v1);
 		interpolateMotionField2(f[i].v2);
+		V_O_list[i] = f[i].v2;
+		V_B_list[i] = f[i].v1;
 		warpImage<Vec3b>(images[i], warpedImages[i], f[i].v1);
+//		warpImage<Vec3b>(images[i], warpedReflections[i], f[i].v2);
 	}
 
 	cout << "Computing initial values for Io and Ib..." << endl;
 	Mat res = Mat::zeros(img_ref.size(), img_ref.type());
+	Mat reflect = Mat::zeros(img_ref.size(), img_ref.type());
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)
@@ -335,20 +341,30 @@ void initialize(vector<Mat>& images, Mat& img_ref, vector<Fields>& motionFields,
 			vector<int> l;
 			for (int k = 0; k < N_IMGS; k++)
 			{
-				Vec3b val = images[k].at<Vec3b>(i, j);
+				Vec3b val = warpedImages[k].at<Vec3b>(i, j);
 				l.push_back(val[0] + val[1] + val[2]);
 			}
 			int ind = min_ind<int>(l);
-			Vec3b val_temp = images[ind].at<Vec3b>(i, j);
+			Vec3b val_temp = warpedImages[ind].at<Vec3b>(i, j);
 			Vec3b val = img_ref.at<Vec3b>(i, j);
 			Vec3b min_val = (val[0] + val[1] + val[2] <
 				val_temp[0] + val_temp[1] + val_temp[2]) ? val : val_temp;
 			res.at<Vec3b>(i, j) = min_val;
+			Vec3b ref_val;
+			Vec3b orig = img_ref.at<Vec3b>(i, j);
+			ref_val[0] = abs(min_val[0] - orig[0]);
+			ref_val[1] = abs(min_val[1] - orig[1]);
+			ref_val[2] = abs(min_val[2] - orig[2]);
+			if (min_val == Vec3b(0, 0, 0))
+				ref_val = Vec3b(0, 0, 0);
+			reflect.at<Vec3b>(i, j) = ref_val;
 		}
 	}
 	motionFields = f;
 	I_O = res;
-	imshow("Initialisation", res);
-	imwrite("../result.png", res);
+	I_B = reflect;
+	imshow("Initialisation du reflet", reflect);
+	imshow("Initialisation du fond", res);
+	//imwrite("../result.png", reflect);
 	waitKey(0);
 }
