@@ -101,6 +101,128 @@ float objective (const Mat& I_O, const Mat& I_B, const vector<vector<vector<Poin
 	return obj;
 }
 
-void decompose()
+Mat& imgToVec(const Mat& img)
 {
+	int m = img.rows, n = img.cols;
+	Mat res = Mat::zeros(m*n, 1, CV_64F);
+	int m = img.rows, n = img.cols;
+	for (int i = 0; i < m; i++)
+	{
+		for (int j = 0; j < n; j++)
+		{
+			res.at<double>(i*m+j, 1)= (double)img.at<float>(i, j);
+		}
+	}
+	return res;
+}
+
+Mat& vecToImg(const double* vec, const int m, const int n)
+{
+	Mat img = Mat::zeros(m, n, CV_32F);
+	for (int i = 0; i < m; i++)
+	{
+		for (int j = 0; j < n; j++)
+		{
+			img.at<float>(i, j) = (float)vec[m*i + j];
+		}
+	}
+//	delete vec;
+	return img;
+}
+
+Mat& vecToImg2(const Mat& vec, int m, int n)
+{
+	Mat img = Mat::zeros(m, n, CV_32F);
+	for (int i = 0; i < m; i++)
+	{
+		for (int j = 0; j < n; j++)
+		{
+			img.at<float>(i, j) = (float)vec.at<double>(i*m+j, 1);
+		}
+	}
+	return img;
+}
+
+class Objective_O : public MinProblemSolver::Function
+{
+private:
+	const Mat I_B, img_ref;
+	const vector<Mat&> imgs;
+	const vector<vector<vector<Point2i>>>& V_O_list, V_B_list;
+public:
+	Objective_O(Mat& I_Bc, vector<vector<vector<Point2i>>>& V_O_listc,
+		vector<vector<vector<Point2i>>>& V_B_listc, vector<Mat&> imgsc, Mat& img_refc):
+		I_B(I_Bc), V_O_list (V_O_listc), V_B_list (V_B_listc), imgs(imgsc), img_ref (img_refc)
+	{	}
+	int getDims() const
+	{
+		return I_B.rows * I_B.cols;
+	}
+	double calc(const double* x)const
+	{
+		Mat I_O = vecToImg(x, I_B.rows, I_B.cols);
+		float obj = objective(I_O, I_B, V_O_list, V_B_list, imgs, img_ref);
+		return (double)obj;
+	}
+};
+
+Mat& solve_O (Mat& I_B, Mat& I_O, vector<vector<vector<Point2i>>>& V_O_list,
+	vector<vector<vector<Point2i>>>& V_B_list, vector<Mat&> imgs, Mat& img_ref)
+{
+	cv::Ptr<cv::DownhillSolver> solver = cv::DownhillSolver::create();
+	cv::Ptr<cv::MinProblemSolver::Function> ptr_F = cv::makePtr<Objective_O>(I_B, V_O_list,
+		V_B_list, imgs, img_ref);
+	solver->setFunction(ptr_F);
+	Mat x = imgToVec(I_O);
+	double res = solver->minimize(x);
+	int m = I_O.rows, n = I_O.cols;
+	Mat new_I_O = vecToImg2(x, m, n);
+	return new_I_O;
+}
+
+
+class Objective_B : public MinProblemSolver::Function
+{
+private:
+	const Mat I_O, img_ref;
+	const vector<Mat&> imgs;
+	const vector<vector<vector<Point2i>>>& V_O_list, V_B_list;
+public:
+	Objective_B(Mat& I_Oc, vector<vector<vector<Point2i>>>& V_O_listc,
+		vector<vector<vector<Point2i>>>& V_B_listc, vector<Mat&> imgsc, Mat& img_refc) :
+		I_O(I_Oc), V_O_list(V_O_listc), V_B_list(V_B_listc), imgs(imgsc), img_ref(img_refc)
+	{	}
+	int getDims() const
+	{
+		return I_O.rows * I_O.cols;
+	}
+	double calc(const double* x)const
+	{
+		Mat I_B = vecToImg(x, I_O.rows, I_O.cols);
+		float obj = objective(I_O, I_B, V_O_list, V_B_list, imgs, img_ref);
+		return (double)obj;
+	}
+};
+
+Mat& solve_B(Mat& I_B, Mat& I_O, vector<vector<vector<Point2i>>>& V_O_list,
+	vector<vector<vector<Point2i>>>& V_B_list, vector<Mat&> imgs, Mat& img_ref)
+{
+	cv::Ptr<cv::DownhillSolver> solver = cv::DownhillSolver::create();
+	cv::Ptr<cv::MinProblemSolver::Function> ptr_F = cv::makePtr<Objective_B>(I_O, V_O_list,
+		V_B_list, imgs, img_ref);
+	solver->setFunction(ptr_F);
+	Mat x = imgToVec(I_B);
+	double res = solver->minimize(x);
+	int m = I_B.rows, n = I_B.cols;
+	Mat new_I_B = vecToImg2(x, m, n);
+	return new_I_B;
+}
+
+void decompose(Mat& I_O, Mat& I_B, vector<vector<vector<Point2i>>>& V_O_list,
+	vector<vector<vector<Point2i>>>& V_B_list, vector<Mat&> imgs, Mat& img_ref)
+{
+	Mat new_I_O = solve_O(I_B, I_O, V_O_list, V_B_list, imgs, img_ref);
+	Mat new_I_B = solve_B(I_B, I_O, V_O_list, V_B_list, imgs, img_ref);
+	I_O = new_I_O;
+	I_B = new_I_B;
 }

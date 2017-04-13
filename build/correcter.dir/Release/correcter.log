@@ -1,1 +1,72 @@
-﻿  correcter.vcxproj -> C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\build\Release\correcter.exe
+﻿  decomposition.cpp
+C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\decomposition.cpp(18): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\decomposition.cpp(26): warning C4244: 'return' : conversion de 'double' en 'float', perte possible de données
+C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xmemory0(591): error C2528: 'pointer' : pointeur non conforme vers la référence
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xmemory0(801): note: voir la référence à l'instanciation de la classe modèle 'std::allocator<_Ty>' en cours de compilation
+          with
+          [
+              _Ty=cv::Mat &
+          ]
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vector(444): note: voir la référence à l'instanciation de la classe modèle 'std::_Wrap_alloc<std::allocator<_Ty>>' en cours de compilation
+          with
+          [
+              _Ty=cv::Mat &
+          ]
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vector(496): note: voir la référence à l'instanciation de la classe modèle 'std::_Vec_base_types<_Ty,_Alloc>' en cours de compilation
+          with
+          [
+              _Ty=cv::Mat &,
+              _Alloc=std::allocator<cv::Mat &>
+          ]
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vector(679): note: voir la référence à l'instanciation de la classe modèle 'std::_Vector_alloc<std::_Vec_base_types<_Ty,_Alloc>>' en cours de compilation
+          with
+          [
+              _Ty=cv::Mat &,
+              _Alloc=std::allocator<cv::Mat &>
+          ]
+  C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\decomposition.cpp(66): note: voir la référence à l'instanciation de la classe modèle 'std::vector<cv::Mat &,std::allocator<_Ty>>' en cours de compilation
+          with
+          [
+              _Ty=cv::Mat &
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xmemory0(592): error C2528: 'const_pointer' : pointeur non conforme vers la référence
+C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xmemory0(615): error C2535: 'cv::Mat &(*std::allocator<_Ty>::address(cv::Mat &) noexcept const)' : fonction membre déjà définie ou déclarée
+          with
+          [
+              _Ty=cv::Mat &
+          ]
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xmemory0(609): note: voir la déclaration de 'std::allocator<_Ty>::address'
+          with
+          [
+              _Ty=cv::Mat &
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xmemory0(734): error C2528: 'pointer' : pointeur non conforme vers la référence
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xmemory0(805): note: voir la référence à l'instanciation de la classe modèle 'std::allocator_traits<_Alloc>' en cours de compilation
+          with
+          [
+              _Alloc=std::allocator<cv::Mat &>
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xmemory0(735): error C2528: 'const_pointer' : pointeur non conforme vers la référence
+C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xmemory0(754): error C2528: '<template-parameter>' : pointeur non conforme vers la référence
+C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xmemory0(760): error C2528: '<template-parameter>' : pointeur non conforme vers la référence
+C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xmemory0(848): error C2535: 'cv::Mat &(*std::_Wrap_alloc<std::allocator<_Ty>>::address(cv::Mat &) const)' : fonction membre déjà définie ou déclarée
+          with
+          [
+              _Ty=cv::Mat &
+          ]
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xmemory0(842): note: voir la déclaration de 'std::_Wrap_alloc<std::allocator<_Ty>>::address'
+          with
+          [
+              _Ty=cv::Mat &
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xmemory0(195): error C2528: 'abstract declarator' : pointeur non conforme vers la référence
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vector(447): note: voir la référence à l'instanciation de la classe modèle 'std::_Is_simple_alloc<std::_Wrap_alloc<std::allocator<_Ty>>>' en cours de compilation
+          with
+          [
+              _Ty=cv::Mat &
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xmemory0(195): error C2528: '<template-parameter>' : pointeur non conforme vers la référence
+C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xmemory0(195): fatal error C1903: impossible de récupérer à partir des erreurs précédentes ; arrêt de la compilation
+  ERREUR INTERNE DU COMPILATEUR dans 'C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64\CL.exe'
+      Choisissez la commande Support technique du menu ? (Aide) de Visual C++
+    ou ouvrez le fichier d'aide du Support technique pour plus d'informations
