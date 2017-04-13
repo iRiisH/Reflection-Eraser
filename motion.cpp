@@ -65,7 +65,7 @@ float objective2(const Mat& I_O, const Mat& I_B, const vector<vector<Point2i>> &
 	const vector<vector<Point2i>> &V_B, const Mat& img)
 {
 	// be careful that the images are all CV_32F (float) format
-	Mat I_O_channels[3], I_B_channels[3], img_channels[3];
+	vector<Mat> I_O_channels(3), I_B_channels(3), img_channels(3);
 	int m = I_O.rows, n = I_O.cols;
 	float obj = 0.;
 	for (int k = 0; k < 3; k++)
@@ -103,10 +103,10 @@ class Objective_V_O : public MinProblemSolver::Function
 {
 private:
 	const Mat I_O, I_B;
-	const Mat& img;
-	const vector<vector<Point2i>>& V_B;
+	const Mat img;
+	const vector<vector<Point2i>> V_B;
 public:
-	Objective_V_O(Mat& I_Oc, Mat& I_Bc, vector<vector<Point2i>>& V_Bc, Mat& imgc) :
+	Objective_V_O(Mat I_Oc, Mat I_Bc, vector<vector<Point2i>> V_Bc, Mat imgc) :
 		I_O (I_Oc), I_B (I_Bc), V_B (V_Bc), img (imgc)
 	{	}
 	int getDims() const
@@ -142,10 +142,10 @@ class Objective_V_B : public MinProblemSolver::Function
 {
 private:
 	const Mat I_O, I_B;
-	const Mat& img;
-	const vector<vector<Point2i>>& V_O;
+	const Mat img;
+	const vector<vector<Point2i>> V_O;
 public:
-	Objective_V_B(Mat& I_Oc, Mat& I_Bc, vector<vector<Point2i>>& V_Oc, Mat& imgc) :
+	Objective_V_B(Mat I_Oc, Mat I_Bc, vector<vector<Point2i>> V_Oc, Mat imgc) :
 		I_O(I_Oc), I_B(I_Bc), V_O(V_Oc), img(imgc)
 	{	}
 	int getDims() const
@@ -187,7 +187,7 @@ void motionEstimation(Mat& I_O, Mat& I_B, vector<vector<Point2i>>& V_O,
 }
 
 void estimateMotion(Mat& I_O, Mat& I_B, vector<vector<vector<Point2i>>>& V_O_list,
-	vector<vector<vector<Point2i>>>& V_B_list, vector<Mat&> &imgs)
+	vector<vector<vector<Point2i>>>& V_B_list, vector<Mat> &imgs)
 {
 	assert(imgs.size() == N_IMGS);
 	for (int k = 0; k < N_IMGS; k++)

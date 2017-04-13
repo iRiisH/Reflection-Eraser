@@ -60,8 +60,8 @@ float L(const Mat& I_O, const Mat& I_Oh, const Mat& I_B, const Mat& I_Bh)
 	return res;
 }
 
-float objective (const Mat& I_O, const Mat& I_B, const vector<vector<vector<Point2i>>> &V_O_list,
-	const vector<vector<vector<Point2i>>> &V_B_list, const vector<Mat&> imgs, const Mat& img_ref)
+float objective1 (const Mat& I_O, const Mat& I_B, const vector<vector<vector<Point2i>>> &V_O_list,
+	const vector<vector<vector<Point2i>>> &V_B_list, const vector<Mat> imgs, const Mat& img_ref)
 {
 	// be careful that the images are all CV_32F (float) format
 	assert(I_O.type() == CV_32F);
@@ -104,7 +104,6 @@ Mat& imgToVec(const Mat& img)
 {
 	int m = img.rows, n = img.cols;
 	Mat res = Mat::zeros(m*n, 1, CV_64F);
-	int m = img.rows, n = img.cols;
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)
@@ -146,11 +145,11 @@ class Objective_O : public MinProblemSolver::Function
 {
 private:
 	const Mat I_B, img_ref;
-	const vector<Mat&> imgs;
-	const vector<vector<vector<Point2i>>>& V_O_list, V_B_list;
+	const vector<Mat> imgs;
+	const vector<vector<vector<Point2i>>> V_O_list, V_B_list;
 public:
-	Objective_O(Mat& I_Bc, vector<vector<vector<Point2i>>>& V_O_listc,
-		vector<vector<vector<Point2i>>>& V_B_listc, vector<Mat&> imgsc, Mat& img_refc):
+	Objective_O(Mat I_Bc, vector<vector<vector<Point2i>>> V_O_listc,
+		vector<vector<vector<Point2i>>> V_B_listc, vector<Mat> imgsc, Mat img_refc):
 		I_B(I_Bc), V_O_list (V_O_listc), V_B_list (V_B_listc), imgs(imgsc), img_ref (img_refc)
 	{	}
 	int getDims() const
@@ -160,13 +159,13 @@ public:
 	double calc(const double* x)const
 	{
 		Mat I_O = vecToImg(x, I_B.rows, I_B.cols);
-		float obj = objective(I_O, I_B, V_O_list, V_B_list, imgs, img_ref);
+		float obj = objective1(I_O, I_B, V_O_list, V_B_list, imgs, img_ref);
 		return (double)obj;
 	}
 };
 
 Mat& solve_O (Mat& I_B, Mat& I_O, vector<vector<vector<Point2i>>>& V_O_list,
-	vector<vector<vector<Point2i>>>& V_B_list, vector<Mat&> imgs, Mat& img_ref)
+	vector<vector<vector<Point2i>>>& V_B_list, vector<Mat>& imgs, Mat& img_ref)
 {
 	cv::Ptr<cv::DownhillSolver> solver = cv::DownhillSolver::create();
 	cv::Ptr<cv::MinProblemSolver::Function> ptr_F = cv::makePtr<Objective_O>(I_B, V_O_list,
@@ -184,11 +183,11 @@ class Objective_B : public MinProblemSolver::Function
 {
 private:
 	const Mat I_O, img_ref;
-	const vector<Mat&> imgs;
-	const vector<vector<vector<Point2i>>>& V_O_list, V_B_list;
+	const vector<Mat> imgs;
+	const vector<vector<vector<Point2i>>> V_O_list, V_B_list;
 public:
-	Objective_B(Mat& I_Oc, vector<vector<vector<Point2i>>>& V_O_listc,
-		vector<vector<vector<Point2i>>>& V_B_listc, vector<Mat&> imgsc, Mat& img_refc) :
+	Objective_B(Mat I_Oc, vector<vector<vector<Point2i>>> V_O_listc,
+		vector<vector<vector<Point2i>>> V_B_listc, vector<Mat> imgsc, Mat img_refc) :
 		I_O(I_Oc), V_O_list(V_O_listc), V_B_list(V_B_listc), imgs(imgsc), img_ref(img_refc)
 	{	}
 	int getDims() const
@@ -198,13 +197,13 @@ public:
 	double calc(const double* x)const
 	{
 		Mat I_B = vecToImg(x, I_O.rows, I_O.cols);
-		float obj = objective(I_O, I_B, V_O_list, V_B_list, imgs, img_ref);
+		float obj = objective1(I_O, I_B, V_O_list, V_B_list, imgs, img_ref);
 		return (double)obj;
 	}
 };
 
 Mat& solve_B(Mat& I_B, Mat& I_O, vector<vector<vector<Point2i>>>& V_O_list,
-	vector<vector<vector<Point2i>>>& V_B_list, vector<Mat&> imgs, Mat& img_ref)
+	vector<vector<vector<Point2i>>>& V_B_list, vector<Mat>& imgs, Mat& img_ref)
 {
 	cv::Ptr<cv::DownhillSolver> solver = cv::DownhillSolver::create();
 	cv::Ptr<cv::MinProblemSolver::Function> ptr_F = cv::makePtr<Objective_B>(I_O, V_O_list,
@@ -218,20 +217,19 @@ Mat& solve_B(Mat& I_B, Mat& I_O, vector<vector<vector<Point2i>>>& V_O_list,
 }
 
 void decompose(Mat& I_O, Mat& I_B, vector<vector<vector<Point2i>>>& V_O_list,
-	vector<vector<vector<Point2i>>>& V_B_list, vector<Mat&> imgs, Mat& img_ref)
+	vector<vector<vector<Point2i>>>& V_B_list, vector<Mat>& imgs, Mat& img_ref)
 {
-	Mat I_O_channels[3], I_B_channels[3], img_ref_channels[3];
-	vector<Mat&> imgs_channels[3];
+	vector<Mat> I_O_channels(3), I_B_channels(3), img_ref_channels(3);
+	vector<vector<Mat>> imgs_channels(3);
 	int m = I_O.rows, n = I_O.cols;
 	for (int k = 0; k < 3; k++)
 	{
 		I_O_channels[k] = Mat::zeros(m, n, CV_32F);
 		I_B_channels[k] = Mat::zeros(m, n, CV_32F);
 		img_ref_channels[k] = Mat::zeros(m, n, CV_32F);
+		imgs_channels[k] = vector<Mat>(N_IMGS);
 		for (int l = 0; l < N_IMGS; l++)
-		{
 			imgs_channels[k][l] = Mat::zeros(m, n, CV_32F);
-		}
 		for (int i = 0; i < m; i++)
 		{
 			for (int j = 0; j < n; j++)
@@ -244,7 +242,7 @@ void decompose(Mat& I_O, Mat& I_B, vector<vector<vector<Point2i>>>& V_O_list,
 			}
 		}
 	}
-	Mat new_I_O_channels[3], new_I_B_channels[3];
+	vector<Mat> new_I_O_channels(3), new_I_B_channels(3);
 	for (int k = 0; k < 3; k++)
 	{
 		new_I_O_channels[k] = solve_O(I_B_channels[k], I_O_channels[k], V_O_list, V_B_list, imgs_channels[k], img_ref_channels[k]);
@@ -256,8 +254,8 @@ void decompose(Mat& I_O, Mat& I_B, vector<vector<vector<Point2i>>>& V_O_list,
 		{
 			for (int j = 0; j < n; j++)
 			{
-				I_O.at<Vec3b>(i, j)[k] = (int)((I_O_channels[k]).at<float>(i, j)[k] *255.);
-				I_B.at<Vec3b>(i, j)[k] = (int)((I_B_channels[k]).at<float>(i, j)[k] * 255.);
+				I_O.at<Vec3b>(i, j)[k] = (int)((I_O_channels[k]).at<float>(i, j) *255.);
+				I_B.at<Vec3b>(i, j)[k] = (int)((I_B_channels[k]).at<float>(i, j) * 255.);
 			}
 		}
 	}
