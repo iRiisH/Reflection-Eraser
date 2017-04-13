@@ -2,3 +2,4 @@ build/*.sdf
 build/*.opensdf
 edges/build/*.sdf
 edges/build/*.opensdf
+build/*
