@@ -2,7 +2,6 @@
 
 #define LAMBDA2 .1
 #define LAMBDA3 3000
-#define LAMBDA4 .5
 #define LAMBDAP 100000.
 
 
@@ -221,8 +220,45 @@ Mat& solve_B(Mat& I_B, Mat& I_O, vector<vector<vector<Point2i>>>& V_O_list,
 void decompose(Mat& I_O, Mat& I_B, vector<vector<vector<Point2i>>>& V_O_list,
 	vector<vector<vector<Point2i>>>& V_B_list, vector<Mat&> imgs, Mat& img_ref)
 {
-	Mat new_I_O = solve_O(I_B, I_O, V_O_list, V_B_list, imgs, img_ref);
-	Mat new_I_B = solve_B(I_B, I_O, V_O_list, V_B_list, imgs, img_ref);
-	I_O = new_I_O;
-	I_B = new_I_B;
+	Mat I_O_channels[3], I_B_channels[3], img_ref_channels[3];
+	vector<Mat&> imgs_channels[3];
+	int m = I_O.rows, n = I_O.cols;
+	for (int k = 0; k < 3; k++)
+	{
+		I_O_channels[k] = Mat::zeros(m, n, CV_32F);
+		I_B_channels[k] = Mat::zeros(m, n, CV_32F);
+		img_ref_channels[k] = Mat::zeros(m, n, CV_32F);
+		for (int l = 0; l < N_IMGS; l++)
+		{
+			imgs_channels[k][l] = Mat::zeros(m, n, CV_32F);
+		}
+		for (int i = 0; i < m; i++)
+		{
+			for (int j = 0; j < n; j++)
+			{
+				I_O_channels[k].at<float>(i, j) = ((float)I_O.at<Vec3b>(i, j)[k]) / 255.;
+				I_B_channels[k].at<float>(i, j) = ((float)I_B.at<Vec3b>(i, j)[k]) / 255.;
+				img_ref_channels[k].at<float>(i, j) = ((float)img_ref.at<Vec3b>(i, j)[k]) / 255.;
+				for (int l = 0; l < N_IMGS; l++)
+					imgs_channels[k][l].at<float>(i, j) = ((float)imgs[l].at<Vec3b>(i, j)[k]) / 255.;
+			}
+		}
+	}
+	Mat new_I_O_channels[3], new_I_B_channels[3];
+	for (int k = 0; k < 3; k++)
+	{
+		new_I_O_channels[k] = solve_O(I_B_channels[k], I_O_channels[k], V_O_list, V_B_list, imgs_channels[k], img_ref_channels[k]);
+		new_I_B_channels[k] = solve_B(I_B_channels[k], I_O_channels[k], V_O_list, V_B_list, imgs_channels[k], img_ref_channels[k]);
+	}
+	for (int k = 0; k < 3; k++)
+	{
+		for (int i = 0; i < m; i++)
+		{
+			for (int j = 0; j < n; j++)
+			{
+				I_O.at<Vec3b>(i, j)[k] = (int)((I_O_channels[k]).at<float>(i, j)[k] *255.);
+				I_B.at<Vec3b>(i, j)[k] = (int)((I_B_channels[k]).at<float>(i, j)[k] * 255.);
+			}
+		}
+	}
 }

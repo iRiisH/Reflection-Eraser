@@ -1,6 +1,12 @@
-﻿  decomposition.cpp
-C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\decomposition.cpp(18): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
-C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\decomposition.cpp(26): warning C4244: 'return' : conversion de 'double' en 'float', perte possible de données
+﻿  main.cpp
+  image.cpp
+C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\image.cpp(42): warning C4244: 'return' : conversion de 'double' en 'float', perte possible de données
+C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\image.cpp(112): warning C4267: 'initialisation' : conversion de 'size_t' en 'int', perte possible de données
+C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\image.cpp(118): warning C4244: 'initialisation' : conversion de 'double' en 'float', perte possible de données
+C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\image.cpp(119): warning C4244: 'initialisation' : conversion de 'double' en 'float', perte possible de données
+  decomposition.cpp
+C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\decomposition.cpp(17): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\decomposition.cpp(25): warning C4244: 'return' : conversion de 'double' en 'float', perte possible de données
 C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xmemory0(591): error C2528: 'pointer' : pointeur non conforme vers la référence
   C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xmemory0(801): note: voir la référence à l'instanciation de la classe modèle 'std::allocator<_Ty>' en cours de compilation
           with
@@ -24,7 +30,7 @@ C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xmemory0(591): er
               _Ty=cv::Mat &,
               _Alloc=std::allocator<cv::Mat &>
           ]
-  C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\decomposition.cpp(66): note: voir la référence à l'instanciation de la classe modèle 'std::vector<cv::Mat &,std::allocator<_Ty>>' en cours de compilation
+  C:\Users\Tangi\Documents\Travail\INF\INF473i\Projet\decomposition.cpp(65): note: voir la référence à l'instanciation de la classe modèle 'std::vector<cv::Mat &,std::allocator<_Ty>>' en cours de compilation
           with
           [
               _Ty=cv::Mat &

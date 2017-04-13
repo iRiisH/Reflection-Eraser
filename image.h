@@ -55,6 +55,7 @@ Mat& imgMinus(const Mat& I1, const Mat& I2);
 double NCC(const Image<float>& I1, Point m1, const Image<float>& I2, Point m2, int n);
 bool rectContains(int m, int n, Point2i p);
 float gradient_normL1(const Mat& img);
+float gradient_field_normL1(const vector<vector<Point2i>>& v);
 Mat& warpedImage(const Mat& I, const vector<vector<Point2i>> &v);
 float min(const Mat& img);
 

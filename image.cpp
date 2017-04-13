@@ -96,11 +96,28 @@ float gradient_normL1(const Mat& img)
 	float res = 0.;
 	for (int i = 0; i < m - 1; i++)
 	{
-		for (int j = 0; j < n; j++)
+		for (int j = 0; j < n - 1; j++)
 		{
 			float dx = img.at<float>(i, j + 1) - img.at<float>(i, j);
 			float dy = img.at<float>(i + 1, j) - img.at<float>(i, j);
 			res += abs(dx) + abs(dy);
+		}
+	}
+	return res;
+}
+
+float gradient_field_normL1(const vector<vector<Point2i>>& v)
+{
+	assert(v.size() > 0);
+	int m = v.size(), n = v[0].size();
+	float res = 0.;
+	for (int i = 0; i < m - 1; i++)
+	{
+		for (int j = 0; j < n - 1; j++)
+		{
+			float dx = pow ((float)v[i][j + 1].x - v[i][j].x, 2.) + pow ((float)v[i][j+1].y - v[j][j].y, 2.);
+			float dy = pow((float)v[i+1][j].x - v[i][j].x, 2.) + pow((float)v[i+1][j].y - v[j][j].y, 2.);
+			res += dx + dy;
 		}
 	}
 	return res;
@@ -145,6 +162,7 @@ Mat& vecMul(const Mat& A, const Mat& v)
 Mat& imgMinus(const Mat& I1, const Mat& I2)
 {
 	assert(I1.type() == CV_32F);
+	int m = I1.rows, n = I1.cols;
 	Mat res = Mat::zeros(m, n, CV_32F);
 	for (int i = 0; i < m; i++)
 	{
