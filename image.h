@@ -17,9 +17,10 @@
 #define RESIZE_RATIO 0.25
 #define EDGES_THRESHOLD 20     // the threshold used by the Canny edge detector
 #define EDGES_RATIO 3
-#define MAX_ITERATIONS 20 //500
-#define CONV_PRECISION 0.001   // the termination conditions for downhill optimizer
-#define INIT_SPREAD 1.
+#define MAX_ITERATIONS 20
+#define CONV_PRECISION 0.01    // the termination conditions for downhill optimizer
+#define INIT_SPREAD 1.         // initial spread for the simplex used by Nelder-Mead optimizer,
+                               // in the decomposition step
 using namespace cv;
 using namespace std;
 

@@ -73,6 +73,7 @@ Mat temp_I_O, temp_I_B;
 
 float objective1(const Mat& I_O, const Mat& I_B, int k)
 {
+	cout << "*";
 	// be careful that the images are all CV_32F (float) format
 	assert(I_O.type() == CV_32F && I_B.type() == CV_32F &&
 		imgs_channels[k][0].type() == CV_32F && img_ref_channels[k].type() == CV_32F);
@@ -176,7 +177,7 @@ void solve_O (int channel)
 	for (int i = 0; i < m*n; i++)
 		initStep.at<double>(i, 0) = val;
 	solver->setInitStep(initStep);
-	TermCriteria tc(TermCriteria::MAX_ITER + TermCriteria::EPS, MAX_ITERATIONS, CONV_PRECISION);
+	TermCriteria tc(TermCriteria::MAX_ITER, MAX_ITERATIONS, CONV_PRECISION);
 	solver->setTermCriteria(tc);
 	Mat x = imgToVec(I_O_channels[channel]);
 	double res = solver->minimize(x);
@@ -215,7 +216,7 @@ void solve_B(int channel)
 	for (int i = 0; i < m*n; i++)
 		initStep.at<double>(i, 0) = val;
 	solver->setInitStep(initStep);
-	TermCriteria tc(TermCriteria::MAX_ITER + TermCriteria::EPS, 500, 0.001);
+	TermCriteria tc(TermCriteria::COUNT + TermCriteria::EPS, MAX_ITERATIONS, CONV_PRECISION);
 	solver->setTermCriteria(tc);
 	Mat x = imgToVec(I_B_channels[channel]);
 	double res = solver->minimize(x);
@@ -260,7 +261,10 @@ void decompose(Mat& I_O, Mat& I_B, vector<vector<vector<Point2i>>>& V_O_listc,
 	
 	for (int k = 0; k < 3; k++)
 	{
+		cout << "channel No. " << k+1 << endl;
+		cout << "optimizing for Io" << endl;
 		solve_O(k);
+		cout << "optimizing for Ib" << endl;
 		solve_B(k);
 		for (int i = 0; i < m; i++)
 		{
@@ -273,6 +277,6 @@ void decompose(Mat& I_O, Mat& I_B, vector<vector<vector<Point2i>>>& V_O_listc,
 	}
 	I_O = new_I_O;
 	I_B = new_I_B;
-	imwrite("../t1.png", I_O);
-	imwrite("../t2.png", I_B);
+//	imwrite("../t1.png", I_O);
+//	imwrite("../t2.png", I_B);
 }

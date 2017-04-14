@@ -108,6 +108,7 @@ void testInitialisation()
 }
 
 void testSimpleAlg ()
+// DO NOT RUN if the image is not resized prior to the optimization, due to memory constraints
 {
 	vector<Mat> imgs(N_IMGS);
 	Mat img_ref;
@@ -121,7 +122,7 @@ void testSimpleAlg ()
 	int N = 4;
 	for (int k = 0; k < N; k++)
 	{
-		decompose(I_O, I_B, V_O_list, V_B_list, imgs, img_ref);
+		//decompose(I_O, I_B, V_O_list, V_B_list, imgs, img_ref);
 		estimateMotion(I_O, I_B, V_O_list, V_B_list, imgs);
 	}
 	imwrite("../four_iter.png", I_O);

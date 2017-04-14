@@ -35,8 +35,8 @@ void fieldListToVec(const vector<vector<Point2i>>& v, Mat& res)
 	{
 		for (int j = 0; j < n; j++)
 		{
-			res.at<double>(i*m + j, 1) = (double)v[i][j].x;
-			res.at<double>(m*n + i*m + j, 1) = (double)v[i][j].y;
+			res.at<double>(i*m + j, 0) = (double)v[i][j].x;
+			res.at<double>(m*n + i*m + j, 0) = (double)v[i][j].y;
 		}
 	}
 }
@@ -52,17 +52,23 @@ vector<vector<Point2i>>& vecToFieldList(Mat& vec, int m, int n)
 	{
 		for (int j = 0; j < n; j++)
 		{
-			res[i][j].x = (int)vec.at<double>(i*m + j, 1);
-			res[i][j].y = (int)vec.at<double>(m*n + i*m + j, 1);
+			res[i][j].x = (int)vec.at<double>(i*m + j, 0);
+			res[i][j].y = (int)vec.at<double>(m*n + i*m + j, 0);
 		}
 	}
 	
 	return res;
 }
 
+// once again we have to use these as global variables
+
+Mat I_O, I_B, img;
+vector<vector<Point2i>> V_O, V_B;
+
 float objective2(const Mat& I_O, const Mat& I_B, const vector<vector<Point2i>> &V_O,
 	const vector<vector<Point2i>> &V_B, const Mat& img)
 {
+	cout << "*";
 	// be careful that the images are all CV_32F (float) format
 	vector<Mat> I_O_channels(3), I_B_channels(3), img_channels(3);
 	int m = I_O.rows, n = I_O.cols;
@@ -105,17 +111,11 @@ float objective2(const Mat& I_O, const Mat& I_B, const vector<vector<Point2i>> &
 
 class Objective_V_O : public MinProblemSolver::Function
 {
-private:
-	const Mat I_O, I_B;
-	const Mat img;
-	const vector<vector<Point2i>> V_B;
+
 public:
-	Objective_V_O(Mat I_Oc, Mat I_Bc, vector<vector<Point2i>> V_Bc, Mat imgc) :
-		I_O (I_Oc), I_B (I_Bc), V_B (V_Bc), img (imgc)
-	{	}
 	int getDims() const
 	{
-		return I_O.rows * I_O.cols;
+		return 2*I_O.rows * I_O.cols;
 	}
 	double calc(const double* x)const
 	{
@@ -129,20 +129,22 @@ public:
 	}
 };
 
-vector<vector<Point2i>>& solve_V_O(Mat& I_O, Mat& I_B, vector<vector<Point2i>>& V_O,
-	vector<vector<Point2i>>& V_B, Mat& img)
+vector<vector<Point2i>>& solve_V_O()
 {
 	int m = I_O.rows, n = I_O.cols;
 	cv::Ptr<cv::DownhillSolver> solver = cv::DownhillSolver::create();
-	cv::Ptr<cv::MinProblemSolver::Function> ptr_F = cv::makePtr<Objective_V_O>(I_O, I_B, V_B, img);
+
+	cv::Ptr<cv::MinProblemSolver::Function> ptr_F = cv::makePtr<Objective_V_O>();
 	solver->setFunction(ptr_F);
-	Mat initStep = Mat::zeros(m*n, 1, CV_64FC1);
+	Mat initStep = Mat::zeros(2*m*n, 1, CV_64FC1);
 	double val = 3.;
-	for (int i = 0; i < m*n; i++)
+	for (int i = 0; i < 2*m*n; i++)
 		initStep.at<double>(i, 0) = val;
 	solver->setInitStep(initStep);
+
 	Mat x;
 	fieldListToVec(V_O, x);
+
 	double res = solver->minimize(x);
 	vector<vector<Point2i>> new_V_O = vecToFieldList(x, m, n);
 	return new_V_O;
@@ -150,17 +152,10 @@ vector<vector<Point2i>>& solve_V_O(Mat& I_O, Mat& I_B, vector<vector<Point2i>>& 
 
 class Objective_V_B : public MinProblemSolver::Function
 {
-private:
-	const Mat I_O, I_B;
-	const Mat img;
-	const vector<vector<Point2i>> V_O;
 public:
-	Objective_V_B(Mat I_Oc, Mat I_Bc, vector<vector<Point2i>> V_Oc, Mat imgc) :
-		I_O(I_Oc), I_B(I_Bc), V_O(V_Oc), img(imgc)
-	{	}
 	int getDims() const
 	{
-		return I_O.rows * I_O.cols;
+		return 2*I_O.rows * I_O.cols;
 	}
 	double calc(const double* x)const
 	{
@@ -174,16 +169,15 @@ public:
 	}
 };
 
-vector<vector<Point2i>>& solve_V_B(Mat& I_O, Mat& I_B, vector<vector<Point2i>>& V_O,
-	vector<vector<Point2i>>& V_B, Mat& img)
+vector<vector<Point2i>>& solve_V_B()
 {
 	int m = I_O.rows, n = I_O.cols;
 	cv::Ptr<cv::DownhillSolver> solver = cv::DownhillSolver::create();
-	cv::Ptr<cv::MinProblemSolver::Function> ptr_F = cv::makePtr<Objective_V_B>(I_O, I_B, V_O, img);
+	cv::Ptr<cv::MinProblemSolver::Function> ptr_F = cv::makePtr<Objective_V_B>();
 	solver->setFunction(ptr_F);
 	Mat initStep = Mat::zeros(m*n, 1, CV_64FC1);
 	double val = 3.;
-	for (int i = 0; i < m*n; i++)
+	for (int i = 0; i < 2*m*n; i++)
 		initStep.at<double>(i, 0) = val;
 	solver->setInitStep(initStep);
 	Mat x;
@@ -193,20 +187,26 @@ vector<vector<Point2i>>& solve_V_B(Mat& I_O, Mat& I_B, vector<vector<Point2i>>& 
 	return new_V_B;
 }
 
-void motionEstimation(Mat& I_O, Mat& I_B, vector<vector<Point2i>>& V_O,
-	vector<vector<Point2i>>& V_B, Mat& img)
+void motionEstimation()
 {
-	vector<vector<Point2i>> new_V_O = solve_V_O(I_O, I_B, V_O, V_B, img);
-	vector<vector<Point2i>> new_V_B = solve_V_B(I_O, I_B, V_O, V_B, img);
+	vector<vector<Point2i>> new_V_O = solve_V_O();
+	vector<vector<Point2i>> new_V_B = solve_V_B();
 	V_O = new_V_O;
 	V_B = new_V_B;
 }
 
-void estimateMotion(Mat& I_O, Mat& I_B, vector<vector<vector<Point2i>>>& V_O_list,
+void estimateMotion(Mat& I_Oc, Mat& I_Bc, vector<vector<vector<Point2i>>>& V_O_list,
 	vector<vector<vector<Point2i>>>& V_B_list, vector<Mat> &imgs)
 {
 	cout << "Motion estimation" << endl;
 	assert(imgs.size() == N_IMGS);
+	I_O = I_Oc;
+	I_B = I_Bc;
 	for (int k = 0; k < N_IMGS; k++)
-		motionEstimation(I_O, I_B, V_O_list[k], V_B_list[k], imgs[k]);
+	{
+		V_O = V_O_list[k];
+		V_B = V_B_list[k];
+		img = imgs[k];
+		motionEstimation();
+	}
 }
