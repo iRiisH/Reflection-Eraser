@@ -10,6 +10,7 @@ void testSparseMotion();
 void testTriangulation();
 void testInterpol();
 void testInitialisation();
+void testSimpleAlg();
 
 int main(int argc, char** argv)
 {
@@ -17,24 +18,8 @@ int main(int argc, char** argv)
 	//testTriangulation();
 	//testInterpol();
 	//testInitialisation();
+	testSimpleAlg();
 
-	vector<Mat> imgs(N_IMGS);
-	Mat img_ref;
-	loadImages(imgs, img_ref);
-	vector<Fields> f(N_IMGS);
-	Mat I_O, I_B;
-	vector<vector<vector<Point2i>>> V_O_list, V_B_list;
-	int m = img_ref.rows, n = img_ref.cols;
-	zero_initialize(m, n, f, I_O, I_B, V_O_list, V_B_list);
-	
-	int N = 4;
-	for (int k = 0; k < N; k++)
-	{
-		decompose(I_O, I_B, V_O_list, V_B_list, imgs, img_ref);
-		estimateMotion(I_O, I_B, V_O_list, V_B_list, imgs);
-	}
-	imwrite("../four_iter.png", I_O);
-	imwrite("../four_iter_ref.png", I_B);
 	return 0;
 }
 
@@ -120,4 +105,25 @@ void testInitialisation()
 	imshow("Initialisation du reflet", I_O);
 	imshow("Initialisation du fond", I_B);
 	waitKey(0);
+}
+
+void testSimpleAlg ()
+{
+	vector<Mat> imgs(N_IMGS);
+	Mat img_ref;
+	loadImages(imgs, img_ref);
+	vector<Fields> f(N_IMGS);
+	Mat I_O, I_B;
+	vector<vector<vector<Point2i>>> V_O_list, V_B_list;
+	int m = img_ref.rows, n = img_ref.cols;
+	initialize(imgs, img_ref, f, I_O, I_B, V_O_list, V_B_list);
+
+	int N = 4;
+	for (int k = 0; k < N; k++)
+	{
+		decompose(I_O, I_B, V_O_list, V_B_list, imgs, img_ref);
+		estimateMotion(I_O, I_B, V_O_list, V_B_list, imgs);
+	}
+	imwrite("../four_iter.png", I_O);
+	imwrite("../four_iter_ref.png", I_B);
 }

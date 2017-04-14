@@ -101,7 +101,6 @@ float objective1(const Mat& I_O, const Mat& I_B, int k)
 	imgMinus(img_ref_channels[k], I_O, temp);
 	imgMinus(temp, I_B, temp);
 	float t_main = normL1(temp);
-	cout << "finex" << endl;
 
 	for (int i = 0; i < N_IMGS; i++)
 	{
@@ -173,10 +172,12 @@ void solve_O (int channel)
 	cv::Ptr<cv::MinProblemSolver::Function> ptr_F = cv::makePtr<Objective_O>(channel);
 	solver->setFunction(ptr_F);
 	Mat initStep = Mat::zeros(m*n, 1, CV_64FC1);
-	double val = 5. / 255.;
+	double val =INIT_SPREAD;
 	for (int i = 0; i < m*n; i++)
 		initStep.at<double>(i, 0) = val;
 	solver->setInitStep(initStep);
+	TermCriteria tc(TermCriteria::MAX_ITER + TermCriteria::EPS, MAX_ITERATIONS, CONV_PRECISION);
+	solver->setTermCriteria(tc);
 	Mat x = imgToVec(I_O_channels[channel]);
 	double res = solver->minimize(x);
 //	Mat new_I_O = vecToImg2(x, m, n);
@@ -210,23 +211,28 @@ void solve_B(int channel)
 	cv::Ptr<cv::MinProblemSolver::Function> ptr_F = cv::makePtr<Objective_B>(channel);
 	solver->setFunction(ptr_F);
 	Mat initStep = Mat::zeros(m*n, 1, CV_64FC1);
-	double val = 5. / 255.;
+	double val = INIT_SPREAD;
 	for (int i = 0; i < m*n; i++)
 		initStep.at<double>(i, 0) = val;
 	solver->setInitStep(initStep);
+	TermCriteria tc(TermCriteria::MAX_ITER + TermCriteria::EPS, 500, 0.001);
+	solver->setTermCriteria(tc);
 	Mat x = imgToVec(I_B_channels[channel]);
 	double res = solver->minimize(x);
 //	Mat new_I_B = vecToImg2(x, m, n);
 //	return new_I_B;
 }
 
-void decompose(Mat& I_O, Mat& I_B, vector<vector<vector<Point2i>>>& V_O_list,
-	vector<vector<vector<Point2i>>>& V_B_list, vector<Mat>& imgs, Mat& img_ref)
+void decompose(Mat& I_O, Mat& I_B, vector<vector<vector<Point2i>>>& V_O_listc,
+	vector<vector<vector<Point2i>>>& V_B_listc, vector<Mat>& imgs, Mat& img_ref)
 {
+	cout << "Image decomposition" << endl;
 	I_O_channels = vector<Mat>(3);
 	I_B_channels = vector<Mat>(3);
 	img_ref_channels = vector<Mat>(3);
 	imgs_channels = vector<vector<Mat>> (3);
+	V_B_list = V_B_listc;
+	V_O_list = V_O_listc;
 	int m = I_O.rows, n = I_O.cols;
 	temp_I_O = Mat::zeros(m, n, CV_32F);
 	temp_I_B = Mat::zeros(m, n, CV_32F);
@@ -261,10 +267,12 @@ void decompose(Mat& I_O, Mat& I_B, vector<vector<vector<Point2i>>>& V_O_list,
 			for (int j = 0; j < n; j++)
 			{
 				new_I_O.at<Vec3b>(i, j)[k] = (int)((I_O_channels[k]).at<float>(i, j) *255.);
-				I_B.at<Vec3b>(i, j)[k] = (int)((I_B_channels[k]).at<float>(i, j) * 255.);
+				new_I_B.at<Vec3b>(i, j)[k] = (int)((I_B_channels[k]).at<float>(i, j) * 255.);
 			}
 		}
 	}
 	I_O = new_I_O;
 	I_B = new_I_B;
+	imwrite("../t1.png", I_O);
+	imwrite("../t2.png", I_B);
 }

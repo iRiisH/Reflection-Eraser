@@ -24,12 +24,12 @@ float func_w3m(const Mat& V_Bth)
 	return func_w2m(V_Bth);
 }*/
 
-Mat& fieldListToVec(const vector<vector<Point2i>>& v)
+void fieldListToVec(const vector<vector<Point2i>>& v, Mat& res)
 {
 	assert(v.size() > 0);
 	assert(v[0].size() > 0);
 	int m = v.size(), n = v[0].size();
-	Mat res = Mat::zeros(2*m*n, 1, CV_64FC1);
+	res = Mat::zeros(2*m*n, 1, CV_64FC1);
 	
 	for (int i = 0; i < m; i++)
 	{
@@ -39,7 +39,6 @@ Mat& fieldListToVec(const vector<vector<Point2i>>& v)
 			res.at<double>(m*n + i*m + j, 1) = (double)v[i][j].y;
 		}
 	}
-	return res;
 }
 
 vector<vector<Point2i>>& vecToFieldList(Mat& vec, int m, int n)
@@ -142,7 +141,8 @@ vector<vector<Point2i>>& solve_V_O(Mat& I_O, Mat& I_B, vector<vector<Point2i>>& 
 	for (int i = 0; i < m*n; i++)
 		initStep.at<double>(i, 0) = val;
 	solver->setInitStep(initStep);
-	Mat x = fieldListToVec(V_O);
+	Mat x;
+	fieldListToVec(V_O, x);
 	double res = solver->minimize(x);
 	vector<vector<Point2i>> new_V_O = vecToFieldList(x, m, n);
 	return new_V_O;
@@ -186,7 +186,8 @@ vector<vector<Point2i>>& solve_V_B(Mat& I_O, Mat& I_B, vector<vector<Point2i>>& 
 	for (int i = 0; i < m*n; i++)
 		initStep.at<double>(i, 0) = val;
 	solver->setInitStep(initStep);
-	Mat x = fieldListToVec(V_B);
+	Mat x;
+	fieldListToVec(V_B, x);
 	double res = solver->minimize(x);
 	vector<vector<Point2i>> new_V_B = vecToFieldList(x, m, n);
 	return new_V_B;
@@ -204,6 +205,7 @@ void motionEstimation(Mat& I_O, Mat& I_B, vector<vector<Point2i>>& V_O,
 void estimateMotion(Mat& I_O, Mat& I_B, vector<vector<vector<Point2i>>>& V_O_list,
 	vector<vector<vector<Point2i>>>& V_B_list, vector<Mat> &imgs)
 {
+	cout << "Motion estimation" << endl;
 	assert(imgs.size() == N_IMGS);
 	for (int k = 0; k < N_IMGS; k++)
 		motionEstimation(I_O, I_B, V_O_list[k], V_B_list[k], imgs[k]);

@@ -11,7 +11,7 @@ struct IntVec
 //float func_w1m(const Mat& I_t, const Mat& I_O, const Mat& I_B, vector<vector<Point2i>> V_Oth, vector<vector<Point2i>> V_Bth, IntVec a);
 //float func_w2m(const Mat& V_Oth);
 //float func_w3m(const Mat& V_Bth);
-Mat& fieldListToVec(const vector<vector<Point2i>>& v);
+void fieldListToVec(const vector<vector<Point2i>>& v, Mat& res);
 vector<vector<Point2i>>& vecToFieldList(Mat& vec, int m, int n);
 float objective2(const Mat& I_O, const Mat& I_B, const vector<vector<Point2i>> &V_O,
 	const vector<vector<Point2i>> &V_B, const Mat& img);

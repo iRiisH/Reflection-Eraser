@@ -371,6 +371,7 @@ void initialize(vector<Mat>& images, Mat& img_ref, vector<Fields>& motionFields,
 
 void zero_initialize(int m, int n,vector<Fields>& motionFields, Mat& I_O, Mat& I_B,
 	vector<vector<vector<Point2i>>>& V_O_list, vector<vector<vector<Point2i>>>& V_B_list)
+	// for test purposes
 {
 	V_O_list = vector<vector<vector<Point2i>>>(N_IMGS);
 	V_B_list = vector<vector<vector<Point2i>>>(N_IMGS);
