@@ -2,7 +2,7 @@
 
 #define LAMBDA4 0.5
 
-float func_w1m(const Mat& I_t, const Mat& I_O, const Mat& I_B, const vector<vector<Point2i>> V_Oth, const vector<vector<Point2i>> V_Bth, IntVec a)
+/*float func_w1m(const Mat& I_t, const Mat& I_O, const Mat& I_B, const vector<vector<Point2i>> V_Oth, const vector<vector<Point2i>> V_Bth, IntVec a)
 {
 	IntVec pO, pB;
 	pO.x = a.x - (V_Oth[a.x][a.y]).x; pO.y = a.y - (V_Oth[a.x][a.y]).y;
@@ -22,14 +22,14 @@ float func_w2m(const Mat& V_Oth)
 float func_w3m(const Mat& V_Bth)
 {
 	return func_w2m(V_Bth);
-}
+}*/
 
 Mat& fieldListToVec(const vector<vector<Point2i>>& v)
 {
 	assert(v.size() > 0);
 	assert(v[0].size() > 0);
 	int m = v.size(), n = v[0].size();
-	Mat res = Mat::zeros(2*m*n, 1, CV_64F);
+	Mat res = Mat::zeros(2*m*n, 1, CV_64FC1);
 	
 	for (int i = 0; i < m; i++)
 	{
@@ -84,9 +84,14 @@ float objective2(const Mat& I_O, const Mat& I_B, const vector<vector<Point2i>> &
 		}
 
 		// objective term
-		Mat I_O_mod = warpedImage(I_O_channels[k], V_O), I_B_mod = warpedImage(I_B_channels[k], V_B);
-		Mat temp2 = imgMinus(img_channels[k], I_O_mod);
-		float t_main = normL1(imgMinus(temp2, I_B_mod));
+		Mat I_O_mod;
+		warpImage<float>(I_O_channels[k], I_O_mod, V_O);
+		Mat I_B_mod;
+		warpImage<float>(I_B_channels[k], I_B_mod, V_B);
+		Mat temp2;
+		imgMinus(img_channels[k], I_O_mod, temp2);
+		imgMinus(temp2, I_B_mod, temp2);
+		float t_main = normL1(temp2);
 		obj += t_main;
 	}
 	// motion field smoothness term
@@ -128,12 +133,17 @@ public:
 vector<vector<Point2i>>& solve_V_O(Mat& I_O, Mat& I_B, vector<vector<Point2i>>& V_O,
 	vector<vector<Point2i>>& V_B, Mat& img)
 {
+	int m = I_O.rows, n = I_O.cols;
 	cv::Ptr<cv::DownhillSolver> solver = cv::DownhillSolver::create();
 	cv::Ptr<cv::MinProblemSolver::Function> ptr_F = cv::makePtr<Objective_V_O>(I_O, I_B, V_B, img);
 	solver->setFunction(ptr_F);
+	Mat initStep = Mat::zeros(m*n, 1, CV_64FC1);
+	double val = 3.;
+	for (int i = 0; i < m*n; i++)
+		initStep.at<double>(i, 0) = val;
+	solver->setInitStep(initStep);
 	Mat x = fieldListToVec(V_O);
 	double res = solver->minimize(x);
-	int m = I_O.rows, n = I_O.cols;
 	vector<vector<Point2i>> new_V_O = vecToFieldList(x, m, n);
 	return new_V_O;
 }
@@ -167,12 +177,17 @@ public:
 vector<vector<Point2i>>& solve_V_B(Mat& I_O, Mat& I_B, vector<vector<Point2i>>& V_O,
 	vector<vector<Point2i>>& V_B, Mat& img)
 {
+	int m = I_O.rows, n = I_O.cols;
 	cv::Ptr<cv::DownhillSolver> solver = cv::DownhillSolver::create();
 	cv::Ptr<cv::MinProblemSolver::Function> ptr_F = cv::makePtr<Objective_V_B>(I_O, I_B, V_O, img);
 	solver->setFunction(ptr_F);
+	Mat initStep = Mat::zeros(m*n, 1, CV_64FC1);
+	double val = 3.;
+	for (int i = 0; i < m*n; i++)
+		initStep.at<double>(i, 0) = val;
+	solver->setInitStep(initStep);
 	Mat x = fieldListToVec(V_B);
 	double res = solver->minimize(x);
-	int m = I_O.rows, n = I_O.cols;
 	vector<vector<Point2i>> new_V_B = vecToFieldList(x, m, n);
 	return new_V_B;
 }

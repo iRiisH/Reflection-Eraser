@@ -11,11 +11,11 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-#define N_IMGS 4
-#define PATH "../images/half/"
-#define RESIZE false
-#define RESIZE_RATIO 0.5
-#define EDGES_THRESHOLD 20
+#define N_IMGS 4               // number of images in PATH folder (minus one, that is used as reference frame)
+#define PATH "../images/half/" // source folder
+#define RESIZE true            // if true, resizes the image with the RESIZE_RATIO
+#define RESIZE_RATIO 0.25
+#define EDGES_THRESHOLD 20     // the threshold used by the Canny edge detector
 #define EDGES_RATIO 3
 
 using namespace cv;
@@ -47,16 +47,15 @@ public:
 float normL1(const Mat& img);
 float normL2(const Mat& img);
 float phi(float x);
-Mat& Dx(const Mat& img);
-Mat& Dy(const Mat& img);
-Mat& gradient(const Mat& img);
-Mat& vecMul(const Mat& A, const Mat& v);
-Mat& imgMinus(const Mat& I1, const Mat& I2);
+void Dx(const Mat& img, Mat& deriv);
+void Dy(const Mat& img, Mat& deriv);
+void gradient(const Mat& img, Mat& grad);
+void vecMul(const Mat& A, const Mat& v, Mat& result);
+void imgMinus(const Mat& I1, const Mat& I2, Mat& res);
 double NCC(const Image<float>& I1, Point m1, const Image<float>& I2, Point m2, int n);
 bool rectContains(int m, int n, Point2i p);
 float gradient_normL1(const Mat& img);
 float gradient_field_normL1(const vector<vector<Point2i>>& v);
-Mat& warpedImage(const Mat& I, const vector<vector<Point2i>> &v);
 float min(const Mat& img);
 
 template<typename T>

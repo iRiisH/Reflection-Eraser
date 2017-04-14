@@ -18,5 +18,7 @@ vector<vector<Point2i>> loadMotionField(String filename);
 void displayMotionField(const vector<vector<Point2i>> v, Mat& img);
 void estimateInitialBackground(vector<vector<Point2i>> v_b, const Mat& I1, const Mat& I2);
 void loadImages(vector<Mat>& images, Mat& im_ref);
-void initialize(vector<Mat>& images, Mat& img_ref, vector<Fields>& motionFields, Mat& I_O, Mat& I_B
-	vector<vector<vector<Point2i>>> V_O_list, vector<vector<vector<Point2i>>> V_B_list);
+void initialize(vector<Mat>& images, Mat& img_ref, vector<Fields>& motionFields, Mat& I_O, Mat& I_B,
+	vector<vector<vector<Point2i>>>& V_O_list, vector<vector<vector<Point2i>>>& V_B_list);
+void zero_initialize(int m, int n, vector<Fields>& motionFields, Mat& I_O, Mat& I_B,
+	vector<vector<vector<Point2i>>>& V_O_list, vector<vector<vector<Point2i>>>& V_B_list);

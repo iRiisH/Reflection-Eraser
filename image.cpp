@@ -42,52 +42,49 @@ float phi(float x)
 	return sqrt(x + pow(EPSILON, 2));
 }
 
-Mat& Dx(const Mat& img)
+void Dx(const Mat& img, Mat& deriv)
 {
 	assert(img.depth() == CV_32F);
 
 	int m = img.rows, n = img.cols;
-	Mat deriv = Mat::zeros(m, n, CV_32F);
+	deriv = Mat::zeros(m, n, CV_32F);
 
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n-1; j++)
 			deriv.at<float>(i, j) = img.at<float>(i, j+1) - img.at<float>(i, j);
 	}
-	return deriv;
 }
 
-Mat& Dy(const Mat& img)
+void Dy(const Mat& img, Mat& deriv)
 {
 	assert(img.depth() == CV_32F);
 
 	int m = img.rows, n = img.cols;
-	Mat deriv = Mat::zeros(m, n, CV_32F);
+	deriv = Mat::zeros(m, n, CV_32F);
 
 	for (int i = 0; i < m-1; i++)
 	{
 		for (int j = 0; j < n; j++)
 			deriv.at<float>(i, j) = img.at<float>(i+1, j) - img.at<float>(i, j);
 	}
-	return deriv;
 }
 
-Mat& gradient(const Mat& img)
+void gradient(const Mat& img, Mat& grad)
 {
 	assert(img.depth() == CV_32F);
 	int m = img.rows, n = img.cols;
-	Mat grad = Mat::zeros(m, n, CV_32F);
+	grad = Mat::zeros(m, n, CV_32F);
 
 	for (int i = 0; i < m - 1; i++)
 	{
-		for (int j = 0; j < n; j++)
+		for (int j = 0; j < n-1; j++)
 		{
 			float dx = img.at<float>(i, j+1) - img.at<float>(i, j);
 			float dy = img.at<float>(i + 1, j) - img.at<float>(i, j);
 			grad.at<float>(i, j) = dx*dx + dy*dy;
 		}
 	}
-	return grad;
 }
 
 float gradient_normL1(const Mat& img)
@@ -123,28 +120,11 @@ float gradient_field_normL1(const vector<vector<Point2i>>& v)
 	return res;
 }
 
-Mat& warpedImage(const Mat& I, const vector<vector<Point2i>> &v)
-{
-	assert(v.size() > 0);
-	int m = I.rows, n = I.cols;
-	assert(v.size() == m && v[0].size() == n);
-	Mat res = Mat::zeros(m, n, I.type());
-	for (int i = 0; i < m; i++)
-	{
-		for (int j = 0; j < n; j++)
-		{
-			Point2i p = v[i][j];
-			res.at<Vec3b>(i, j) = res.at<Vec3b>(i - p.x, j - p.y);
-		}
-	}
-	return res;
-}
-
-Mat& vecMul(const Mat& A, const Mat& v)
+void vecMul(const Mat& A, const Mat& v, Mat& res)
 {
 	assert(A.cols == v.cols * v.rows && A.rows == v.cols * v.rows);
 
-	Mat res = Mat::zeros(v.rows, v.cols, CV_32F);
+	res = Mat::zeros(v.rows, v.cols, CV_32F);
 
 	for (int i = 0; i < v.rows; i++)
 	{
@@ -156,20 +136,18 @@ Mat& vecMul(const Mat& A, const Mat& v)
 			res.at<float>(i, j) = sum;
 		}
 	}
-	return res;
 }
 
-Mat& imgMinus(const Mat& I1, const Mat& I2)
+void imgMinus(const Mat& I1, const Mat& I2, Mat& res)
 {
 	assert(I1.type() == CV_32F);
 	int m = I1.rows, n = I1.cols;
-	Mat res = Mat::zeros(m, n, CV_32F);
+	res = Mat::zeros(m, n, CV_32F);
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)
 			res.at<float>(i, j) = I1.at<float>(i, j) - I2.at<float>(i, j);
 	}
-	return res;
 }
 
 // Correlation

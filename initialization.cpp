@@ -252,8 +252,8 @@ void displayMotionField(const vector<vector<Point2i>> v, Mat& img)
 	}
 	cvtColor(hsv, img, COLOR_HSV2BGR);
 
-	imshow("motion field visualization", img);
-	waitKey(0);
+	//imshow("motion field visualization", img);
+	//waitKey(0);
 }
 
 void estimateInitialBackground(vector<vector<Point2i>> v_b, const Mat& I1, const Mat& I2)
@@ -363,8 +363,32 @@ void initialize(vector<Mat>& images, Mat& img_ref, vector<Fields>& motionFields,
 	motionFields = f;
 	I_O = res;
 	I_B = reflect;
-	imshow("Initialisation du reflet", reflect);
-	imshow("Initialisation du fond", res);
+	//imshow("Initialisation du reflet", reflect);
+	//imshow("Initialisation du fond", res);
 	//imwrite("../result.png", reflect);
-	waitKey(0);
+	//waitKey(0);
+}
+
+void zero_initialize(int m, int n,vector<Fields>& motionFields, Mat& I_O, Mat& I_B,
+	vector<vector<vector<Point2i>>>& V_O_list, vector<vector<vector<Point2i>>>& V_B_list)
+{
+	V_O_list = vector<vector<vector<Point2i>>>(N_IMGS);
+	V_B_list = vector<vector<vector<Point2i>>>(N_IMGS);
+	for (int k = 0; k < N_IMGS; k++)
+	{
+		V_O_list[k] = vector<vector<Point2i>>(m);
+		V_B_list[k] = vector<vector<Point2i>>(m);
+		for (int i = 0; i < m; i++)
+		{
+			V_O_list[k][i] = vector<Point2i>(n);
+			V_B_list[k][i] = vector<Point2i>(n);
+			for (int j = 0; j < n; j++)
+			{
+				V_O_list[k][i][j] = Point2i(0, 0);
+				V_B_list[k][i][j] = Point2i(0, 0);
+			}
+		}
+	}
+	I_O = Mat::zeros(m, n, CV_8UC3);
+	I_B = Mat::zeros(m, n, CV_8UC3);
 }
