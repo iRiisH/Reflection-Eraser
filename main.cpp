@@ -14,11 +14,11 @@ void testSimpleAlg();
 
 int main(int argc, char** argv)
 {
-	//testSparseMotion();
+	testSparseMotion();
 	//testTriangulation();
 	//testInterpol();
 	//testInitialisation();
-	testSimpleAlg();
+	// testSimpleAlg();
 
 	return 0;
 }
@@ -32,7 +32,7 @@ void testSparseMotion()
 	detectEdges(imgs[0], edges);
 	detectEdges(img_ref, edges_ref);
 	Fields f = detectSparseMotion(edges, edges_ref);
-	
+
 	int m = img_ref.rows, n = img_ref.cols;
 	for (int i = 0; i < m; i++)
 	{
