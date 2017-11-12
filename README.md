@@ -1,6 +1,6 @@
 # Reflection-Eraser
 
-This project is a C++ implementation of Xue et al. approach for reflection removal ([A Computational Approach for Obstruction-Free Photography](https://sites.google.com/site/obstructionfreephotography/) using OpenCV.
+This project is a C++ implementation of Xue et al. approach for reflection removal ([A Computational Approach for Obstruction-Free Photography](https://sites.google.com/site/obstructionfreephotography/)) using OpenCV.
 
 Several slight changes are made, particularly in the initialization process, illustrated below.
 
